@@ -22,6 +22,7 @@ import json
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -85,8 +86,11 @@ def existing_issues(repo: str) -> dict[str, dict[str, Any]]:
     return found
 
 
-def body_for(item_id: str, numbers: dict[str, int]) -> str:
+def body_for(item_id: str, numbers: dict[str, int], preamble: str = "") -> str:
     text = (ISSUES / f"{item_id}.md").read_text(encoding="utf-8")
+    if preamble:
+        marker_end = text.index("-->") + 3  # keep the ID marker first for idempotent matching
+        text = f"{text[:marker_end]}\n\n> {preamble}\n{text[marker_end:]}"
     # Turn backtick IDs into "KS-… (#n)" once the referenced issue exists.
     return re.sub(
         r"`(KS-[A-Z]+-[A-Z0-9]+)`",
@@ -104,6 +108,7 @@ def main() -> int:
         action="store_true",
         help="Also create GitHub sub-issue and blocked-by links (best effort)",
     )
+    ap.add_argument("--preamble", default="", help="Note shown at the top of every issue body")
     args = ap.parse_args()
 
     manifest = json.loads((ISSUES / "manifest.json").read_text(encoding="utf-8"))
@@ -145,7 +150,7 @@ def main() -> int:
     for pass_no in (1, 2):
         for it in items:
             title = f"{it['id']}: {it['title'].removeprefix('Epic: ')}"
-            body = body_for(it["id"], numbers)
+            body = body_for(it["id"], numbers, args.preamble)
             label_args = [x for lbl in it["labels"] for x in ("--label", lbl)]
             if it["id"] in numbers:
                 if pass_no == 2 or it["id"] in existing:
@@ -176,6 +181,7 @@ def main() -> int:
                     input_text=body,
                 ).strip()
                 numbers[it["id"]] = int(url.rsplit("/", 1)[1])
+                time.sleep(1.5)  # stay under GitHub content-creation rate limits
             published[it["id"]] = {
                 "number": numbers[it["id"]],
                 "url": f"https://github.com/{args.repo}/issues/{numbers[it['id']]}",
