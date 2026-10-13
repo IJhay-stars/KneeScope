@@ -1,0 +1,30 @@
+# Shared preprocessing configuration. Training, evaluation, caching and serving all call
+# kneescope_ml.preprocess.preprocess_study() with this file. Changing any value changes
+# model inputs: bump `version`, invalidate caches and cached predictions, and record the
+# change in docs/decisions.md.
+version = "prep-0.0.0-placeholder"
+status = "placeholder" # becomes "frozen" once the data issue (KS-DATA-07) is accepted
+
+[input]
+planes = ["sagittal", "coronal", "axial"]
+num_slices = 32          # S: slices sampled per plane after ordering
+height = 256             # H
+width = 256              # W
+dtype = "float32"
+layout = "S,H,W"         # per plane; the model adapter may tile to 3 channels
+slice_sampling = "uniform_centered"   # evenly spaced over the ordered series
+slice_order = "patient_position"      # project ImagePositionPatient onto the slice normal
+resize = "bilinear_preserve_aspect_pad" # pad value is the post-normalisation minimum
+orientation = "dicom_lps_as_acquired" # never mirror; record laterality, do not flip
+
+[input.normalization]
+method = "percentile_clip_zscore"     # per series: clip to [p_low, p_high], then z-score
+p_low = 0.5
+p_high = 99.5
+
+[render]
+# Display rendering for GET /studies/{id}/series/{sid}/slices/{index}. Not used as
+# model input. Output is 8-bit grayscale PNG: a display rendering, not MRI window/level.
+max_size = 512
+p_low = 0.5
+p_high = 99.5

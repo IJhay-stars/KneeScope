@@ -1,0 +1,22 @@
+# Model serving configuration. Checkpoints live outside git (see .gitignore and
+# docs/decisions.md D-007). An empty checkpoint_path means no model is loaded and the
+# API can only run in fixture mode.
+[model]
+model_id = "unset"
+model_version = "0.0.0-unset"
+checkpoint_path = ""          # e.g. artifacts/checkpoints/<run_id>/model.pt (untracked)
+checkpoint_sha256 = ""        # verified at load time
+finding_profile = "interaction_prototype"
+required_planes = ["sagittal"]
+trained_on = ""               # e.g. "rsna_knee_2026:train-fold0-4"
+
+[serving]
+mode = "sync"                 # "sync" | "job" (job-and-poll only if KS-OPS-04 is triggered)
+request_timeout_s = 30
+cache_dir = "artifacts/prediction-cache"
+
+[fixture_model]
+# Identity used for every fixture result. Fixture results never carry a checkpoint hash.
+model_id = "fixture-model"
+model_version = "fixture-0"
+unsupported_findings = ["lateral_meniscus"] # demonstrates the "unsupported" state
