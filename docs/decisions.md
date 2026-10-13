@@ -59,6 +59,26 @@ entries may supersede earlier ones explicitly. Decisions still open are listed a
   Heavy ML dependencies (torch, pydicom, scikit-learn) live in the `ml` extra so fixture
   mode and CI stay light.
 
+## D-011 — 2026-10-13 — Merge the original main scaffold without removing it
+- **Decision:** `main` (the team's original scaffold: `src/knee_api`, `src/kneeml`,
+  `docs/contracts/01–07`, Docker, Makefile, pre-commit, CODEOWNERS) was merged into
+  `anasabubakar/kneescope-foundation` with both histories kept and nothing deleted, so the
+  foundation can be proposed to `main` as a PR. Authorised by Anas Abubakar.
+- **Conflicts resolved:** `.gitignore` and `.env.example` are unions; README keeps the
+  KneeScope text and describes both scaffolds; `pyproject.toml` packages both layouts,
+  adds the original dependencies (`pydantic-settings`; `SimpleITK`, `pandas`, `pyyaml` in
+  the `ml` extra) and a `dev` extra so `pip install -e ".[dev]"` in the Makefile still works;
+  `ci.yml` is the KneeScope workflow (it also runs the original tests); `web.yml` reads the
+  pnpm version from `web/package.json` instead of pinning pnpm 9. The original lint
+  settings stay in force for the original code via `ruff.toml` files in `src/`,
+  `tests/knee_api/` and `tests/kneeml/`. `data/` and `artifacts/` ignores are now
+  root-anchored so `src/kneeml/data/` is not ignored.
+- **Open:** `.github/CODEOWNERS` assigns data → JesuYiwola, models → DaviStyle, training →
+  anasabubakar, eval → mfon9, inference → mfon9 + JesuYiwola, API → Ijhay-stars, web →
+  okeowovictor. The two layouts overlap (two APIs, two ML packages, two contract
+  folders). The owners should choose one layout per area and retire the other; record it
+  here. This also feeds KS-SCOPE-02.
+
 ## Open decisions
 
 | Decision | Evidence required | Issue |
