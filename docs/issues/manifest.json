@@ -1,0 +1,1169 @@
+{
+  "generated_by": "scripts/backlog.py",
+  "epics": [
+    {
+      "id": "KS-EPIC-SCOPE",
+      "title": "Epic: Product scope, team ownership and organizer requirements",
+      "file": "docs/issues/KS-EPIC-SCOPE.md"
+    },
+    {
+      "id": "KS-EPIC-DATA",
+      "title": "Epic: Data access, audit, adapters and shared preprocessing",
+      "file": "docs/issues/KS-EPIC-DATA.md"
+    },
+    {
+      "id": "KS-EPIC-LABELS",
+      "title": "Epic: Labels and explainability",
+      "file": "docs/issues/KS-EPIC-LABELS.md"
+    },
+    {
+      "id": "KS-EPIC-MODEL",
+      "title": "Epic: Modelling",
+      "file": "docs/issues/KS-EPIC-MODEL.md"
+    },
+    {
+      "id": "KS-EPIC-EVAL",
+      "title": "Epic: Evaluation, model card and cached results",
+      "file": "docs/issues/KS-EPIC-EVAL.md"
+    },
+    {
+      "id": "KS-EPIC-API",
+      "title": "Epic: Backend and serving",
+      "file": "docs/issues/KS-EPIC-API.md"
+    },
+    {
+      "id": "KS-EPIC-WEB",
+      "title": "Epic: Frontend review workflow",
+      "file": "docs/issues/KS-EPIC-WEB.md"
+    },
+    {
+      "id": "KS-EPIC-QUALITY",
+      "title": "Epic: Security, performance, testing and operations",
+      "file": "docs/issues/KS-EPIC-QUALITY.md"
+    },
+    {
+      "id": "KS-EPIC-DELIVERY",
+      "title": "Epic: Documentation, demo and final delivery",
+      "file": "docs/issues/KS-EPIC-DELIVERY.md"
+    }
+  ],
+  "issues": [
+    {
+      "id": "KS-SCOPE-01",
+      "title": "Confirm organizer submission requirements, judging criteria and deadline",
+      "epic": "KS-EPIC-SCOPE",
+      "type": "decision",
+      "priority": "P0",
+      "workstream": "coordination",
+      "owner_role": "Coordinator/integrator (human decision)",
+      "depends_on": [],
+      "blocks": [
+        "KS-OPS-05",
+        "KS-DEL-01"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-SCOPE-01.md"
+    },
+    {
+      "id": "KS-SCOPE-02",
+      "title": "Agree named owners per workstream and record collaboration boundaries",
+      "epic": "KS-EPIC-SCOPE",
+      "type": "decision",
+      "priority": "P0",
+      "workstream": "coordination",
+      "owner_role": "Coordinator/integrator (human decision)",
+      "depends_on": [],
+      "blocks": [],
+      "status": "ready",
+      "file": "docs/issues/KS-SCOPE-02.md"
+    },
+    {
+      "id": "KS-SCOPE-03",
+      "title": "[Conditional] Deliver as an interaction prototype if no usable training data exists",
+      "epic": "KS-EPIC-SCOPE",
+      "type": "conditional",
+      "priority": "P0",
+      "workstream": "coordination",
+      "owner_role": "Coordinator/integrator",
+      "depends_on": [
+        "KS-DATA-04"
+      ],
+      "blocks": [],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-SCOPE-03.md"
+    },
+    {
+      "id": "KS-DATA-01",
+      "title": "Verify RSNA Knee data access and permitted training, hosting, demo and recording uses",
+      "epic": "KS-EPIC-DATA",
+      "type": "decision",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing (human decision; each data handler accepts rules personally)",
+      "depends_on": [],
+      "blocks": [
+        "KS-DATA-03",
+        "KS-DEMO-03"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-DATA-01.md"
+    },
+    {
+      "id": "KS-DATA-02",
+      "title": "Check alternative data sources: MRNet agreement status and organizer-provided data",
+      "epic": "KS-EPIC-DATA",
+      "type": "decision",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing (human decision)",
+      "depends_on": [],
+      "blocks": [
+        "KS-DATA-03"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-DATA-02.md"
+    },
+    {
+      "id": "KS-DATA-03",
+      "title": "Audit the accessible dataset(s): studies, series, planes, labels and grouping identifiers",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing",
+      "depends_on": [
+        "KS-DATA-01",
+        "KS-DATA-02"
+      ],
+      "blocks": [
+        "KS-DATA-04",
+        "KS-DATA-08"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-03.md"
+    },
+    {
+      "id": "KS-DATA-04",
+      "title": "Decide the dataset and supported finding profile",
+      "epic": "KS-EPIC-DATA",
+      "type": "decision",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Coordinator/integrator with Data and Evaluation owners (human decision)",
+      "depends_on": [
+        "KS-DATA-03"
+      ],
+      "blocks": [
+        "KS-SCOPE-03",
+        "KS-DATA-05",
+        "KS-DATA-08",
+        "KS-LABEL-01",
+        "KS-LABEL-02",
+        "KS-OPS-05"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-04.md"
+    },
+    {
+      "id": "KS-DATA-05",
+      "title": "Dataset adapter: study listing, plane assignment, series selection and slice ordering",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing",
+      "depends_on": [
+        "KS-DATA-04"
+      ],
+      "blocks": [
+        "KS-DATA-06",
+        "KS-DATA-07",
+        "KS-API-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-05.md"
+    },
+    {
+      "id": "KS-DATA-06",
+      "title": "Handle orientation metadata, transfer syntaxes, missing series and corrupt inputs",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing",
+      "depends_on": [
+        "KS-DATA-05"
+      ],
+      "blocks": [
+        "KS-DATA-07",
+        "KS-API-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-06.md"
+    },
+    {
+      "id": "KS-DATA-07",
+      "title": "Freeze shared preprocessing v1 with visual inspection evidence",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing",
+      "depends_on": [
+        "KS-DATA-05",
+        "KS-DATA-06"
+      ],
+      "blocks": [
+        "KS-DATA-09",
+        "KS-DATA-10",
+        "KS-API-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-07.md"
+    },
+    {
+      "id": "KS-DATA-08",
+      "title": "Create patient/study-grouped train, validation and test splits with leakage checks",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing with Evaluation reviewer",
+      "depends_on": [
+        "KS-DATA-03",
+        "KS-DATA-04",
+        "KS-LABEL-01"
+      ],
+      "blocks": [
+        "KS-DATA-09",
+        "KS-DATA-10",
+        "KS-MODEL-03",
+        "KS-EVAL-03"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-08.md"
+    },
+    {
+      "id": "KS-DATA-09",
+      "title": "Preprocessed tensor cache and training/evaluation data loaders",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing",
+      "depends_on": [
+        "KS-DATA-07",
+        "KS-DATA-08"
+      ],
+      "blocks": [
+        "KS-MODEL-01",
+        "KS-MODEL-03"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-09.md"
+    },
+    {
+      "id": "KS-DATA-10",
+      "title": "Select permitted demo studies and build the study manifest",
+      "epic": "KS-EPIC-DATA",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "data",
+      "owner_role": "Data/preprocessing with Evaluation",
+      "depends_on": [
+        "KS-DATA-07",
+        "KS-DATA-08"
+      ],
+      "blocks": [
+        "KS-EVAL-07",
+        "KS-DEMO-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DATA-10.md"
+    },
+    {
+      "id": "KS-LABEL-01",
+      "title": "Build the labels file with provenance and explicit unknown handling",
+      "epic": "KS-EPIC-LABELS",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "labels",
+      "owner_role": "Labels/explainability",
+      "depends_on": [
+        "KS-DATA-04"
+      ],
+      "blocks": [
+        "KS-DATA-08",
+        "KS-LABEL-02",
+        "KS-MODEL-01",
+        "KS-MODEL-03",
+        "KS-EVAL-06",
+        "KS-API-05"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-LABEL-01.md"
+    },
+    {
+      "id": "KS-LABEL-02",
+      "title": "[Conditional] Extract labels from radiology reports with negation, uncertainty and provenance",
+      "epic": "KS-EPIC-LABELS",
+      "type": "conditional",
+      "priority": "P1",
+      "workstream": "labels",
+      "owner_role": "Labels/explainability",
+      "depends_on": [
+        "KS-DATA-04",
+        "KS-LABEL-01"
+      ],
+      "blocks": [],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-LABEL-02.md"
+    },
+    {
+      "id": "KS-LABEL-03",
+      "title": "Influential-slice explanations aligned to series slice coordinates",
+      "epic": "KS-EPIC-LABELS",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "labels",
+      "owner_role": "Labels/explainability",
+      "depends_on": [
+        "KS-MODEL-03"
+      ],
+      "blocks": [
+        "KS-LABEL-04",
+        "KS-API-03"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-LABEL-03.md"
+    },
+    {
+      "id": "KS-LABEL-04",
+      "title": "[Optional] Grad-CAM attention maps with alignment verification",
+      "epic": "KS-EPIC-LABELS",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "labels",
+      "owner_role": "Labels/explainability",
+      "depends_on": [
+        "KS-LABEL-03"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-LABEL-04.md"
+    },
+    {
+      "id": "KS-MODEL-01",
+      "title": "Simple comparator baseline for every selected finding",
+      "epic": "KS-EPIC-MODEL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "modelling",
+      "owner_role": "Modelling",
+      "depends_on": [
+        "KS-DATA-09",
+        "KS-LABEL-01",
+        "KS-EVAL-01"
+      ],
+      "blocks": [
+        "KS-EVAL-03"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-MODEL-01.md"
+    },
+    {
+      "id": "KS-MODEL-02",
+      "title": "Training pipeline with config, seeding, checkpointing and experiment provenance",
+      "epic": "KS-EPIC-MODEL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "modelling",
+      "owner_role": "Modelling",
+      "depends_on": [],
+      "blocks": [
+        "KS-MODEL-03"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-MODEL-02.md"
+    },
+    {
+      "id": "KS-MODEL-03",
+      "title": "Train the baseline model on the selected dataset",
+      "epic": "KS-EPIC-MODEL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "modelling",
+      "owner_role": "Modelling",
+      "depends_on": [
+        "KS-MODEL-02",
+        "KS-DATA-09",
+        "KS-LABEL-01",
+        "KS-DATA-08"
+      ],
+      "blocks": [
+        "KS-LABEL-03",
+        "KS-MODEL-04",
+        "KS-MODEL-05",
+        "KS-EVAL-02",
+        "KS-EVAL-03"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-MODEL-03.md"
+    },
+    {
+      "id": "KS-MODEL-04",
+      "title": "[Conditional] One improvement round (fine-tuning or adjacent-slice input)",
+      "epic": "KS-EPIC-MODEL",
+      "type": "conditional",
+      "priority": "P2",
+      "workstream": "modelling",
+      "owner_role": "Modelling",
+      "depends_on": [
+        "KS-MODEL-03",
+        "KS-EVAL-03"
+      ],
+      "blocks": [],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-MODEL-04.md"
+    },
+    {
+      "id": "KS-MODEL-05",
+      "title": "Package the checkpoint for serving with hash verification and a Predictor implementation",
+      "epic": "KS-EPIC-MODEL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "modelling",
+      "owner_role": "Modelling with Backend reviewer",
+      "depends_on": [
+        "KS-MODEL-03"
+      ],
+      "blocks": [
+        "KS-API-02",
+        "KS-DOC-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-MODEL-05.md"
+    },
+    {
+      "id": "KS-EVAL-01",
+      "title": "Metrics module: per-finding AUCs with undefined handling, counts, threshold metrics and macro AUC",
+      "epic": "KS-EPIC-EVAL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation",
+      "depends_on": [],
+      "blocks": [
+        "KS-MODEL-01",
+        "KS-EVAL-02"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-EVAL-01.md"
+    },
+    {
+      "id": "KS-EVAL-02",
+      "title": "Select per-finding operating thresholds on the validation partition",
+      "epic": "KS-EPIC-EVAL",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation",
+      "depends_on": [
+        "KS-EVAL-01",
+        "KS-MODEL-03"
+      ],
+      "blocks": [
+        "KS-EVAL-03",
+        "KS-OPT-03"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-EVAL-02.md"
+    },
+    {
+      "id": "KS-EVAL-03",
+      "title": "Held-out evaluation run and published metrics snapshot",
+      "epic": "KS-EPIC-EVAL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation",
+      "depends_on": [
+        "KS-MODEL-03",
+        "KS-MODEL-01",
+        "KS-EVAL-02",
+        "KS-DATA-08"
+      ],
+      "blocks": [
+        "KS-MODEL-04",
+        "KS-EVAL-04",
+        "KS-EVAL-05",
+        "KS-EVAL-06",
+        "KS-API-05",
+        "KS-OPT-06"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-EVAL-03.md"
+    },
+    {
+      "id": "KS-EVAL-04",
+      "title": "Error analysis: false positives, false negatives and failure cases",
+      "epic": "KS-EPIC-EVAL",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation with Labels reviewer",
+      "depends_on": [
+        "KS-EVAL-03"
+      ],
+      "blocks": [
+        "KS-EVAL-06",
+        "KS-DEMO-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-EVAL-04.md"
+    },
+    {
+      "id": "KS-EVAL-05",
+      "title": "[Conditional] Calibration assessment and temperature scaling",
+      "epic": "KS-EPIC-EVAL",
+      "type": "conditional",
+      "priority": "P2",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation",
+      "depends_on": [
+        "KS-EVAL-03"
+      ],
+      "blocks": [],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-EVAL-05.md"
+    },
+    {
+      "id": "KS-EVAL-06",
+      "title": "Complete the model card from evaluated evidence",
+      "epic": "KS-EPIC-EVAL",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation",
+      "depends_on": [
+        "KS-EVAL-03",
+        "KS-EVAL-04",
+        "KS-LABEL-01"
+      ],
+      "blocks": [
+        "KS-API-05",
+        "KS-QA-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-EVAL-06.md"
+    },
+    {
+      "id": "KS-EVAL-07",
+      "title": "Precompute cached predictions for the demo studies with full provenance",
+      "epic": "KS-EPIC-EVAL",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "evaluation",
+      "owner_role": "Evaluation with Backend reviewer",
+      "depends_on": [
+        "KS-API-04",
+        "KS-DATA-10"
+      ],
+      "blocks": [
+        "KS-DEMO-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-EVAL-07.md"
+    },
+    {
+      "id": "KS-API-01",
+      "title": "Dataset-backed study catalogue and slice rendering in model mode",
+      "epic": "KS-EPIC-API",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "backend",
+      "owner_role": "Backend/serving",
+      "depends_on": [
+        "KS-DATA-05",
+        "KS-DATA-06"
+      ],
+      "blocks": [
+        "KS-API-02",
+        "KS-API-05",
+        "KS-OPT-05"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-API-01.md"
+    },
+    {
+      "id": "KS-API-02",
+      "title": "Live inference through shared preprocessing in POST /predictions",
+      "epic": "KS-EPIC-API",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "backend",
+      "owner_role": "Backend/serving",
+      "depends_on": [
+        "KS-API-01",
+        "KS-MODEL-05",
+        "KS-DATA-07"
+      ],
+      "blocks": [
+        "KS-API-03",
+        "KS-API-04",
+        "KS-OPS-02",
+        "KS-OPS-03",
+        "KS-QA-01",
+        "KS-DOC-01",
+        "KS-OPT-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-API-02.md"
+    },
+    {
+      "id": "KS-API-03",
+      "title": "Serve real explanations with alignment validation",
+      "epic": "KS-EPIC-API",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "backend",
+      "owner_role": "Backend/serving with Labels reviewer",
+      "depends_on": [
+        "KS-API-02",
+        "KS-LABEL-03"
+      ],
+      "blocks": [
+        "KS-QA-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-API-03.md"
+    },
+    {
+      "id": "KS-API-04",
+      "title": "Prediction cache with provenance-preserving cached results",
+      "epic": "KS-EPIC-API",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "backend",
+      "owner_role": "Backend/serving",
+      "depends_on": [
+        "KS-API-02"
+      ],
+      "blocks": [
+        "KS-EVAL-07",
+        "KS-DEMO-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-API-04.md"
+    },
+    {
+      "id": "KS-API-05",
+      "title": "Serve real labels, metrics snapshot and model card",
+      "epic": "KS-EPIC-API",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "backend",
+      "owner_role": "Backend/serving",
+      "depends_on": [
+        "KS-API-01",
+        "KS-LABEL-01",
+        "KS-EVAL-03",
+        "KS-EVAL-06"
+      ],
+      "blocks": [
+        "KS-QA-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-API-05.md"
+    },
+    {
+      "id": "KS-WEB-01",
+      "title": "Study browser: filter, sort, responsive list and all states",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [],
+      "blocks": [
+        "KS-WEB-07"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-WEB-01.md"
+    },
+    {
+      "id": "KS-WEB-02",
+      "title": "Slice viewer: canvas rendering, navigation, zoom/pan, display adjust and missing series",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [],
+      "blocks": [
+        "KS-WEB-05",
+        "KS-WEB-07",
+        "KS-OPT-07"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-WEB-02.md"
+    },
+    {
+      "id": "KS-WEB-03",
+      "title": "Findings panel: run analysis, five finding states and result provenance",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [],
+      "blocks": [
+        "KS-WEB-05",
+        "KS-WEB-07",
+        "KS-QA-01",
+        "KS-OPT-02",
+        "KS-OPT-04"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-WEB-03.md"
+    },
+    {
+      "id": "KS-WEB-04",
+      "title": "Reveal dataset label per finding, separate from inference",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [],
+      "blocks": [
+        "KS-WEB-07"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-WEB-04.md"
+    },
+    {
+      "id": "KS-WEB-05",
+      "title": "Explanation panel: influential-slice jump and aligned attention overlay",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [
+        "KS-WEB-02",
+        "KS-WEB-03"
+      ],
+      "blocks": [
+        "KS-WEB-07"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-WEB-05.md"
+    },
+    {
+      "id": "KS-WEB-06",
+      "title": "Evaluation and model-card ledger view",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [],
+      "blocks": [
+        "KS-WEB-07",
+        "KS-DEMO-02",
+        "KS-OPT-03",
+        "KS-OPT-04"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-WEB-06.md"
+    },
+    {
+      "id": "KS-WEB-07",
+      "title": "Accessibility and responsive verification across all pages",
+      "epic": "KS-EPIC-WEB",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend with QA reviewer",
+      "depends_on": [
+        "KS-WEB-01",
+        "KS-WEB-02",
+        "KS-WEB-03",
+        "KS-WEB-04",
+        "KS-WEB-05",
+        "KS-WEB-06"
+      ],
+      "blocks": [
+        "KS-DEMO-02",
+        "KS-QA-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-WEB-07.md"
+    },
+    {
+      "id": "KS-WEB-08",
+      "title": "[Conditional] Client support for job-and-poll predictions",
+      "epic": "KS-EPIC-WEB",
+      "type": "conditional",
+      "priority": "P2",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [
+        "KS-OPS-04"
+      ],
+      "blocks": [],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-WEB-08.md"
+    },
+    {
+      "id": "KS-OPS-01",
+      "title": "Restricted-asset protection: data, checkpoints, logs and repository guards",
+      "epic": "KS-EPIC-QUALITY",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "operations",
+      "owner_role": "Backend/serving with QA reviewer",
+      "depends_on": [],
+      "blocks": [
+        "KS-OPS-05",
+        "KS-QA-02",
+        "KS-OPT-01"
+      ],
+      "status": "ready",
+      "file": "docs/issues/KS-OPS-01.md"
+    },
+    {
+      "id": "KS-OPS-02",
+      "title": "Reproducible local container setup for API and web",
+      "epic": "KS-EPIC-QUALITY",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "operations",
+      "owner_role": "Backend/serving",
+      "depends_on": [
+        "KS-API-02"
+      ],
+      "blocks": [
+        "KS-OPS-05",
+        "KS-DOC-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-OPS-02.md"
+    },
+    {
+      "id": "KS-OPS-03",
+      "title": "Measure inference latency, peak memory and slice-serving latency",
+      "epic": "KS-EPIC-QUALITY",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "operations",
+      "owner_role": "Backend/serving with Evaluation reviewer",
+      "depends_on": [
+        "KS-API-02"
+      ],
+      "blocks": [
+        "KS-OPS-04"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-OPS-03.md"
+    },
+    {
+      "id": "KS-OPS-04",
+      "title": "[Conditional] Minimal job-and-poll inference flow",
+      "epic": "KS-EPIC-QUALITY",
+      "type": "conditional",
+      "priority": "P2",
+      "workstream": "operations",
+      "owner_role": "Backend/serving",
+      "depends_on": [
+        "KS-OPS-03"
+      ],
+      "blocks": [
+        "KS-WEB-08"
+      ],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-OPS-04.md"
+    },
+    {
+      "id": "KS-OPS-05",
+      "title": "[Conditional] Permitted deployment of a hosted demo",
+      "epic": "KS-EPIC-QUALITY",
+      "type": "conditional",
+      "priority": "P2",
+      "workstream": "operations",
+      "owner_role": "Backend/serving with Coordinator approval",
+      "depends_on": [
+        "KS-SCOPE-01",
+        "KS-DATA-04",
+        "KS-OPS-01",
+        "KS-OPS-02"
+      ],
+      "blocks": [],
+      "status": "conditional-pending",
+      "file": "docs/issues/KS-OPS-05.md"
+    },
+    {
+      "id": "KS-QA-01",
+      "title": "End-to-end integration tests for fixture and model modes",
+      "epic": "KS-EPIC-QUALITY",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "qa",
+      "owner_role": "Independent reviewer/QA",
+      "depends_on": [
+        "KS-API-02",
+        "KS-WEB-03"
+      ],
+      "blocks": [
+        "KS-QA-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-QA-01.md"
+    },
+    {
+      "id": "KS-DOC-01",
+      "title": "Reproducible README: a teammate sets up and runs inference from a clean clone",
+      "epic": "KS-EPIC-DELIVERY",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "delivery",
+      "owner_role": "Coordinator/integrator with a teammate as tester",
+      "depends_on": [
+        "KS-API-02",
+        "KS-MODEL-05",
+        "KS-OPS-02"
+      ],
+      "blocks": [
+        "KS-DEL-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DOC-01.md"
+    },
+    {
+      "id": "KS-DEMO-01",
+      "title": "Select demo cases: a correct case, an error case and a limitation",
+      "epic": "KS-EPIC-DELIVERY",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "delivery",
+      "owner_role": "Design/frontend (demo owner) with Evaluation",
+      "depends_on": [
+        "KS-EVAL-04",
+        "KS-EVAL-07",
+        "KS-DATA-10"
+      ],
+      "blocks": [
+        "KS-DEMO-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DEMO-01.md"
+    },
+    {
+      "id": "KS-DEMO-02",
+      "title": "Demo script and rehearsal",
+      "epic": "KS-EPIC-DELIVERY",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "delivery",
+      "owner_role": "Design/frontend (demo owner)",
+      "depends_on": [
+        "KS-DEMO-01",
+        "KS-WEB-07",
+        "KS-API-04",
+        "KS-WEB-06"
+      ],
+      "blocks": [
+        "KS-DEMO-03",
+        "KS-QA-02"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DEMO-02.md"
+    },
+    {
+      "id": "KS-DEMO-03",
+      "title": "Recorded fallback demonstration within data-use terms",
+      "epic": "KS-EPIC-DELIVERY",
+      "type": "task",
+      "priority": "P1",
+      "workstream": "delivery",
+      "owner_role": "Design/frontend (demo owner)",
+      "depends_on": [
+        "KS-DEMO-02",
+        "KS-DATA-01"
+      ],
+      "blocks": [
+        "KS-DEL-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-DEMO-03.md"
+    },
+    {
+      "id": "KS-DEL-01",
+      "title": "Assemble and submit the final delivery package",
+      "epic": "KS-EPIC-DELIVERY",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "delivery",
+      "owner_role": "Coordinator/integrator (human submits)",
+      "depends_on": [
+        "KS-SCOPE-01",
+        "KS-DOC-01",
+        "KS-DEMO-03",
+        "KS-QA-02"
+      ],
+      "blocks": [],
+      "status": "blocked",
+      "file": "docs/issues/KS-DEL-01.md"
+    },
+    {
+      "id": "KS-QA-02",
+      "title": "Independent completion review against the evidence-based definition of done",
+      "epic": "KS-EPIC-DELIVERY",
+      "type": "task",
+      "priority": "P0",
+      "workstream": "qa",
+      "owner_role": "Independent reviewer/QA",
+      "depends_on": [
+        "KS-QA-01",
+        "KS-EVAL-06",
+        "KS-API-05",
+        "KS-API-03",
+        "KS-WEB-07",
+        "KS-OPS-01",
+        "KS-DEMO-02"
+      ],
+      "blocks": [
+        "KS-DEL-01"
+      ],
+      "status": "blocked",
+      "file": "docs/issues/KS-QA-02.md"
+    },
+    {
+      "id": "KS-OPT-01",
+      "title": "[Optional] Upload support for user-supplied studies",
+      "epic": "KS-EPIC-API",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "backend",
+      "owner_role": "Backend/serving with Coordinator approval",
+      "depends_on": [
+        "KS-API-02",
+        "KS-OPS-01"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-01.md"
+    },
+    {
+      "id": "KS-OPT-02",
+      "title": "[Optional] Reviewer notes per study",
+      "epic": "KS-EPIC-WEB",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [
+        "KS-WEB-03"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-02.md"
+    },
+    {
+      "id": "KS-OPT-03",
+      "title": "[Optional] Exploratory threshold slider per finding",
+      "epic": "KS-EPIC-WEB",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend with Evaluation reviewer",
+      "depends_on": [
+        "KS-EVAL-02",
+        "KS-WEB-06"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-03.md"
+    },
+    {
+      "id": "KS-OPT-04",
+      "title": "[Optional] Exportable research summary",
+      "epic": "KS-EPIC-WEB",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [
+        "KS-WEB-03",
+        "KS-WEB-06"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-04.md"
+    },
+    {
+      "id": "KS-OPT-05",
+      "title": "[Optional] Server-side true window/level rendering",
+      "epic": "KS-EPIC-API",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "backend",
+      "owner_role": "Backend/serving with Design/frontend",
+      "depends_on": [
+        "KS-API-01"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-05.md"
+    },
+    {
+      "id": "KS-OPT-06",
+      "title": "[Optional] Additional supported findings",
+      "epic": "KS-EPIC-MODEL",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "modelling",
+      "owner_role": "Modelling with Evaluation",
+      "depends_on": [
+        "KS-EVAL-03"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-06.md"
+    },
+    {
+      "id": "KS-OPT-07",
+      "title": "[Optional] Slice thumbnail strip in the viewer",
+      "epic": "KS-EPIC-WEB",
+      "type": "optional",
+      "priority": "P2",
+      "workstream": "frontend",
+      "owner_role": "Design/frontend",
+      "depends_on": [
+        "KS-WEB-02"
+      ],
+      "blocks": [],
+      "status": "optional-blocked",
+      "file": "docs/issues/KS-OPT-07.md"
+    }
+  ],
+  "critical_path": [
+    "KS-DATA-01",
+    "KS-DATA-03",
+    "KS-DATA-04",
+    "KS-DATA-05",
+    "KS-DATA-06",
+    "KS-DATA-07",
+    "KS-DATA-09",
+    "KS-MODEL-03",
+    "KS-MODEL-05",
+    "KS-API-02",
+    "KS-API-04",
+    "KS-EVAL-07",
+    "KS-DEMO-01",
+    "KS-DEMO-02",
+    "KS-DEMO-03",
+    "KS-DEL-01"
+  ]
+}
