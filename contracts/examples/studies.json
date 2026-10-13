@@ -1,0 +1,58 @@
+{
+  "body": {
+    "origin_notice": "FIXTURE - synthetic development studies, not dataset studies.",
+    "studies": [
+      {
+        "analysis_status": "not_run",
+        "dataset_id": null,
+        "display_label": "Fixture study 001",
+        "origin": "fixture",
+        "planes_available": [
+          "sagittal",
+          "coronal",
+          "axial"
+        ],
+        "series_count": 4,
+        "study_id": "fx-study-001"
+      },
+      {
+        "analysis_status": "not_run",
+        "dataset_id": null,
+        "display_label": "Fixture study 002 (axial missing)",
+        "origin": "fixture",
+        "planes_available": [
+          "sagittal",
+          "coronal"
+        ],
+        "series_count": 2,
+        "study_id": "fx-study-002"
+      },
+      {
+        "analysis_status": "failed",
+        "dataset_id": null,
+        "display_label": "Fixture study 003 (preprocessing failure)",
+        "origin": "fixture",
+        "planes_available": [
+          "sagittal",
+          "coronal",
+          "axial"
+        ],
+        "series_count": 3,
+        "study_id": "fx-study-003"
+      },
+      {
+        "analysis_status": "not_run",
+        "dataset_id": null,
+        "display_label": "Fixture study 004 (sagittal missing)",
+        "origin": "fixture",
+        "planes_available": [
+          "coronal",
+          "axial"
+        ],
+        "series_count": 2,
+        "study_id": "fx-study-004"
+      }
+    ]
+  },
+  "status": 200
+}

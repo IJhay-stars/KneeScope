@@ -1,0 +1,36 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "allow_cached": {
+      "default": true,
+      "description": "Serve a matching cached result instead of running live.",
+      "title": "Allow Cached",
+      "type": "boolean"
+    },
+    "findings": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Subset of the active profile; None means all.",
+      "title": "Findings"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "study_id"
+  ],
+  "title": "PredictionRequest",
+  "type": "object"
+}

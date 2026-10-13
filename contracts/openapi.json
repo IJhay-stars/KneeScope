@@ -1,0 +1,2304 @@
+{
+  "components": {
+    "schemas": {
+      "AnalysisStatus": {
+        "enum": [
+          "not_run",
+          "cached",
+          "failed"
+        ],
+        "title": "AnalysisStatus",
+        "type": "string"
+      },
+      "ApiError": {
+        "additionalProperties": false,
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ApiErrorBody"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ApiError",
+        "type": "object"
+      },
+      "ApiErrorBody": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "request_id",
+          "retryable"
+        ],
+        "title": "ApiErrorBody",
+        "type": "object"
+      },
+      "AttentionMap": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "description": "Base64 PNG, gray 0-255 = relative attention 0-1.",
+            "title": "Data",
+            "type": "string"
+          },
+          "encoding": {
+            "const": "png_base64_gray8",
+            "default": "png_base64_gray8",
+            "title": "Encoding",
+            "type": "string"
+          },
+          "height": {
+            "minimum": 1.0,
+            "title": "Height",
+            "type": "integer"
+          },
+          "slice_index": {
+            "minimum": 0.0,
+            "title": "Slice Index",
+            "type": "integer"
+          },
+          "width": {
+            "minimum": 1.0,
+            "title": "Width",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slice_index",
+          "width",
+          "height",
+          "data"
+        ],
+        "title": "AttentionMap",
+        "type": "object"
+      },
+      "DataOrigin": {
+        "description": "Where a study or artifact came from.",
+        "enum": [
+          "fixture",
+          "dataset"
+        ],
+        "title": "DataOrigin",
+        "type": "string"
+      },
+      "DatasetLabel": {
+        "additionalProperties": false,
+        "properties": {
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/LabelProvenance"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the label came from, e.g. 'train.csv' or 'rules v0.2'.",
+            "title": "Source Ref"
+          },
+          "state": {
+            "$ref": "#/components/schemas/LabelState"
+          }
+        },
+        "required": [
+          "finding_id",
+          "state",
+          "provenance"
+        ],
+        "title": "DatasetLabel",
+        "type": "object"
+      },
+      "Explanation": {
+        "additionalProperties": false,
+        "properties": {
+          "attention": {
+            "items": {
+              "$ref": "#/components/schemas/AttentionMap"
+            },
+            "title": "Attention",
+            "type": "array"
+          },
+          "coordinate_space": {
+            "const": "rendered_slice_pixels",
+            "default": "rendered_slice_pixels",
+            "title": "Coordinate Space",
+            "type": "string"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "influential_slices",
+                  "attention_map"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "notice": {
+            "default": "Shows what influenced the model score; it does not localise an injury.",
+            "title": "Notice",
+            "type": "string"
+          },
+          "plane": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Plane"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prediction_id": {
+            "title": "Prediction Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Reason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rendered_height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rendered Height"
+          },
+          "rendered_width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rendered Width"
+          },
+          "schema_version": {
+            "default": "0.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "series_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Id"
+          },
+          "slices": {
+            "items": {
+              "$ref": "#/components/schemas/ExplanationSlice"
+            },
+            "title": "Slices",
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ResultSource"
+          },
+          "status": {
+            "enum": [
+              "available",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "study_id": {
+            "title": "Study Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id",
+          "finding_id",
+          "prediction_id",
+          "model_version",
+          "status",
+          "source"
+        ],
+        "title": "Explanation",
+        "type": "object"
+      },
+      "ExplanationSlice": {
+        "additionalProperties": false,
+        "properties": {
+          "slice_index": {
+            "description": "0-based index in the series' slice order.",
+            "minimum": 0.0,
+            "title": "Slice Index",
+            "type": "integer"
+          },
+          "weight": {
+            "description": "Relative influence, max-normalised.",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Weight",
+            "type": "number"
+          }
+        },
+        "required": [
+          "slice_index",
+          "weight"
+        ],
+        "title": "ExplanationSlice",
+        "type": "object"
+      },
+      "FindingDefinition": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "finding_id",
+          "display_name",
+          "description"
+        ],
+        "title": "FindingDefinition",
+        "type": "object"
+      },
+      "FindingMetrics": {
+        "additionalProperties": false,
+        "properties": {
+          "brier": {
+            "$ref": "#/components/schemas/MetricValue"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "n_negative": {
+            "minimum": 0.0,
+            "title": "N Negative",
+            "type": "integer"
+          },
+          "n_positive": {
+            "minimum": 0.0,
+            "title": "N Positive",
+            "type": "integer"
+          },
+          "n_unknown": {
+            "description": "Excluded from every metric; never counted as negative.",
+            "minimum": 0.0,
+            "title": "N Unknown",
+            "type": "integer"
+          },
+          "pr_auc": {
+            "$ref": "#/components/schemas/MetricValue"
+          },
+          "prevalence": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prevalence"
+          },
+          "roc_auc": {
+            "$ref": "#/components/schemas/MetricValue"
+          },
+          "sensitivity": {
+            "$ref": "#/components/schemas/MetricValue"
+          },
+          "specificity": {
+            "$ref": "#/components/schemas/MetricValue"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          },
+          "threshold_selected_on": {
+            "anyOf": [
+              {
+                "const": "validation",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold Selected On"
+          }
+        },
+        "required": [
+          "finding_id",
+          "n_positive",
+          "n_negative",
+          "n_unknown",
+          "roc_auc",
+          "pr_auc",
+          "sensitivity",
+          "specificity",
+          "brier"
+        ],
+        "title": "FindingMetrics",
+        "type": "object"
+      },
+      "FindingProfile": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/FindingDefinition"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "profile_id": {
+            "title": "Profile Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "candidate",
+              "selected",
+              "fixture_only"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "profile_id",
+          "dataset_id",
+          "status",
+          "note",
+          "findings"
+        ],
+        "title": "FindingProfile",
+        "type": "object"
+      },
+      "FindingResult": {
+        "additionalProperties": false,
+        "properties": {
+          "above_threshold": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Above Threshold"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "explanation_available": {
+            "default": false,
+            "title": "Explanation Available",
+            "type": "boolean"
+          },
+          "finding_id": {
+            "title": "Finding Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Reason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "score": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "score_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScoreKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/FindingStatus"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Validated operating threshold, if one exists.",
+            "title": "Threshold"
+          }
+        },
+        "required": [
+          "finding_id",
+          "display_name",
+          "status"
+        ],
+        "title": "FindingResult",
+        "type": "object"
+      },
+      "FindingStatus": {
+        "enum": [
+          "scored",
+          "not_evaluated",
+          "unavailable",
+          "unsupported",
+          "failed"
+        ],
+        "title": "FindingStatus",
+        "type": "string"
+      },
+      "Health": {
+        "additionalProperties": false,
+        "properties": {
+          "api_version": {
+            "title": "Api Version",
+            "type": "string"
+          },
+          "finding_profile": {
+            "title": "Finding Profile",
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "fixture",
+              "model"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "model_loaded": {
+            "title": "Model Loaded",
+            "type": "boolean"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "preprocessing_version": {
+            "title": "Preprocessing Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "default": "0.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "degraded"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "api_version",
+          "mode",
+          "model_loaded",
+          "model_version",
+          "preprocessing_version",
+          "finding_profile"
+        ],
+        "title": "Health",
+        "type": "object"
+      },
+      "InferenceMeasurement": {
+        "additionalProperties": false,
+        "properties": {
+          "hardware": {
+            "title": "Hardware",
+            "type": "string"
+          },
+          "latency_ms_p50": {
+            "minimum": 0.0,
+            "title": "Latency Ms P50",
+            "type": "number"
+          },
+          "latency_ms_p95": {
+            "minimum": 0.0,
+            "title": "Latency Ms P95",
+            "type": "number"
+          },
+          "n_runs": {
+            "minimum": 1.0,
+            "title": "N Runs",
+            "type": "integer"
+          },
+          "peak_memory_mb": {
+            "minimum": 0.0,
+            "title": "Peak Memory Mb",
+            "type": "number"
+          }
+        },
+        "required": [
+          "latency_ms_p50",
+          "latency_ms_p95",
+          "peak_memory_mb",
+          "n_runs",
+          "hardware"
+        ],
+        "title": "InferenceMeasurement",
+        "type": "object"
+      },
+      "InputUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "plane": {
+            "$ref": "#/components/schemas/Plane"
+          },
+          "series_id": {
+            "title": "Series Id",
+            "type": "string"
+          },
+          "slices_used": {
+            "minimum": 0.0,
+            "title": "Slices Used",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plane",
+          "series_id",
+          "slices_used"
+        ],
+        "title": "InputUsage",
+        "type": "object"
+      },
+      "LabelProvenance": {
+        "enum": [
+          "expert_annotation",
+          "dataset_provided",
+          "report_extracted",
+          "fixture"
+        ],
+        "title": "LabelProvenance",
+        "type": "string"
+      },
+      "LabelState": {
+        "enum": [
+          "positive",
+          "negative",
+          "unknown",
+          "not_labeled"
+        ],
+        "title": "LabelState",
+        "type": "string"
+      },
+      "MacroAuc": {
+        "additionalProperties": false,
+        "properties": {
+          "excluded": {
+            "description": "code = finding_id, message = why excluded.",
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "included": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Included",
+            "type": "array"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "value",
+          "included",
+          "excluded"
+        ],
+        "title": "MacroAuc",
+        "type": "object"
+      },
+      "MetricValue": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "enum": [
+              "defined",
+              "undefined_single_class",
+              "not_computed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "MetricValue",
+        "type": "object"
+      },
+      "MetricsSnapshot": {
+        "additionalProperties": false,
+        "properties": {
+          "calibration": {
+            "default": "not_assessed",
+            "enum": [
+              "not_assessed",
+              "assessed"
+            ],
+            "title": "Calibration",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "grouping_unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "patient",
+                  "study"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grouping Unit"
+          },
+          "inference": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InferenceMeasurement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "macro_roc_auc": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MacroAuc"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "n_studies": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N Studies"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "partition": {
+            "anyOf": [
+              {
+                "enum": [
+                  "validation",
+                  "test"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Partition"
+          },
+          "per_finding": {
+            "items": {
+              "$ref": "#/components/schemas/FindingMetrics"
+            },
+            "title": "Per Finding",
+            "type": "array"
+          },
+          "preprocessing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreprocessingInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "schema_version": {
+            "default": "0.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "split_method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Split Method"
+          },
+          "status": {
+            "enum": [
+              "available",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "origin"
+        ],
+        "title": "MetricsSnapshot",
+        "type": "object"
+      },
+      "ModelCard": {
+        "additionalProperties": false,
+        "properties": {
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "preprocessing": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PreprocessingInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schema_version": {
+            "default": "0.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/ModelCardSection"
+            },
+            "title": "Sections",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "status",
+          "origin",
+          "model",
+          "preprocessing",
+          "sections",
+          "limitations"
+        ],
+        "title": "ModelCard",
+        "type": "object"
+      },
+      "ModelCardSection": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "section_id",
+          "title",
+          "body"
+        ],
+        "title": "ModelCardSection",
+        "type": "object"
+      },
+      "ModelInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "checkpoint_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "SHA-256 of the checkpoint file. None only for fixtures.",
+            "title": "Checkpoint Sha256"
+          },
+          "finding_profile": {
+            "title": "Finding Profile",
+            "type": "string"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "supported_findings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Supported Findings",
+            "type": "array"
+          },
+          "trained_on": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dataset ID and partition; None for fixtures.",
+            "title": "Trained On"
+          }
+        },
+        "required": [
+          "model_id",
+          "model_version",
+          "checkpoint_sha256",
+          "finding_profile",
+          "supported_findings",
+          "trained_on"
+        ],
+        "title": "ModelInfo",
+        "type": "object"
+      },
+      "Plane": {
+        "enum": [
+          "sagittal",
+          "coronal",
+          "axial"
+        ],
+        "title": "Plane",
+        "type": "string"
+      },
+      "PredictionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "allow_cached": {
+            "default": true,
+            "description": "Serve a matching cached result instead of running live.",
+            "title": "Allow Cached",
+            "type": "boolean"
+          },
+          "findings": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Subset of the active profile; None means all.",
+            "title": "Findings"
+          },
+          "study_id": {
+            "title": "Study Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id"
+        ],
+        "title": "PredictionRequest",
+        "type": "object"
+      },
+      "PredictionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "findings": {
+            "items": {
+              "$ref": "#/components/schemas/FindingResult"
+            },
+            "title": "Findings",
+            "type": "array"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/InputUsage"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "missing_planes": {
+            "items": {
+              "$ref": "#/components/schemas/Plane"
+            },
+            "title": "Missing Planes",
+            "type": "array"
+          },
+          "model": {
+            "$ref": "#/components/schemas/ModelInfo"
+          },
+          "prediction_id": {
+            "title": "Prediction Id",
+            "type": "string"
+          },
+          "preprocessing": {
+            "$ref": "#/components/schemas/PreprocessingInfo"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ResultProvenance"
+          },
+          "schema_version": {
+            "default": "0.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "study_id": {
+            "title": "Study Id",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "prediction_id",
+          "study_id",
+          "provenance",
+          "model",
+          "preprocessing",
+          "findings",
+          "inputs",
+          "missing_planes"
+        ],
+        "title": "PredictionResponse",
+        "type": "object"
+      },
+      "PreprocessingInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "config_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config Sha256"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "PreprocessingInfo",
+        "type": "object"
+      },
+      "Reason": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "description": "Machine-readable code, usually an ErrorCode value.",
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "description": "Plain-language explanation safe to show to a reviewer.",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Reason",
+        "type": "object"
+      },
+      "ResultProvenance": {
+        "additionalProperties": false,
+        "properties": {
+          "cache_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cache Key"
+          },
+          "computed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the scores were originally computed.",
+            "title": "Computed At"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Wall time of this live run; only for source=live.",
+            "title": "Latency Ms"
+          },
+          "notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notice"
+          },
+          "served_at": {
+            "format": "date-time",
+            "title": "Served At",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/ResultSource"
+          }
+        },
+        "required": [
+          "source",
+          "computed_at",
+          "served_at"
+        ],
+        "title": "ResultProvenance",
+        "type": "object"
+      },
+      "ResultSource": {
+        "description": "How a prediction was produced. Never relabel one as another.",
+        "enum": [
+          "live",
+          "cached",
+          "fixture"
+        ],
+        "title": "ResultSource",
+        "type": "string"
+      },
+      "ScoreKind": {
+        "enum": [
+          "uncalibrated_model_score",
+          "calibrated_probability"
+        ],
+        "title": "ScoreKind",
+        "type": "string"
+      },
+      "SeriesSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "fat_suppressed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fat Suppressed"
+          },
+          "fluid_sensitive": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fluid Sensitive"
+          },
+          "num_slices": {
+            "minimum": 1.0,
+            "title": "Num Slices",
+            "type": "integer"
+          },
+          "plane": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Plane"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "None when the plane could not be determined."
+          },
+          "rendered_height": {
+            "minimum": 1.0,
+            "title": "Rendered Height",
+            "type": "integer"
+          },
+          "rendered_width": {
+            "description": "Width in px of PNGs from the slice endpoint.",
+            "minimum": 1.0,
+            "title": "Rendered Width",
+            "type": "integer"
+          },
+          "series_id": {
+            "title": "Series Id",
+            "type": "string"
+          },
+          "slice_order": {
+            "$ref": "#/components/schemas/SliceOrder"
+          }
+        },
+        "required": [
+          "series_id",
+          "plane",
+          "num_slices",
+          "slice_order",
+          "rendered_width",
+          "rendered_height"
+        ],
+        "title": "SeriesSummary",
+        "type": "object"
+      },
+      "SliceOrder": {
+        "description": "How slice_index 0..n-1 was ordered for a series.",
+        "enum": [
+          "patient_position",
+          "instance_number",
+          "dataset_provided",
+          "synthetic"
+        ],
+        "title": "SliceOrder",
+        "type": "string"
+      },
+      "StudyDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_status": {
+            "$ref": "#/components/schemas/AnalysisStatus"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "display_label": {
+            "title": "Display Label",
+            "type": "string"
+          },
+          "missing_planes": {
+            "items": {
+              "$ref": "#/components/schemas/Plane"
+            },
+            "title": "Missing Planes",
+            "type": "array"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "planes_available": {
+            "items": {
+              "$ref": "#/components/schemas/Plane"
+            },
+            "title": "Planes Available",
+            "type": "array"
+          },
+          "series": {
+            "items": {
+              "$ref": "#/components/schemas/SeriesSummary"
+            },
+            "title": "Series",
+            "type": "array"
+          },
+          "series_count": {
+            "minimum": 0.0,
+            "title": "Series Count",
+            "type": "integer"
+          },
+          "study_id": {
+            "title": "Study Id",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "study_id",
+          "display_label",
+          "origin",
+          "dataset_id",
+          "planes_available",
+          "series_count",
+          "analysis_status",
+          "series",
+          "missing_planes"
+        ],
+        "title": "StudyDetail",
+        "type": "object"
+      },
+      "StudyLabels": {
+        "additionalProperties": false,
+        "properties": {
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "labels": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetLabel"
+            },
+            "title": "Labels",
+            "type": "array"
+          },
+          "notice": {
+            "default": "Dataset labels are for evaluation only. They are never used by the model.",
+            "title": "Notice",
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "schema_version": {
+            "default": "0.1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "study_id": {
+            "title": "Study Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id",
+          "dataset_id",
+          "origin",
+          "labels"
+        ],
+        "title": "StudyLabels",
+        "type": "object"
+      },
+      "StudyList": {
+        "additionalProperties": false,
+        "properties": {
+          "origin_notice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Notice"
+          },
+          "studies": {
+            "items": {
+              "$ref": "#/components/schemas/StudySummary"
+            },
+            "title": "Studies",
+            "type": "array"
+          }
+        },
+        "required": [
+          "studies"
+        ],
+        "title": "StudyList",
+        "type": "object"
+      },
+      "StudySummary": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_status": {
+            "$ref": "#/components/schemas/AnalysisStatus"
+          },
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Id"
+          },
+          "display_label": {
+            "title": "Display Label",
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "planes_available": {
+            "items": {
+              "$ref": "#/components/schemas/Plane"
+            },
+            "title": "Planes Available",
+            "type": "array"
+          },
+          "series_count": {
+            "minimum": 0.0,
+            "title": "Series Count",
+            "type": "integer"
+          },
+          "study_id": {
+            "title": "Study Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id",
+          "display_label",
+          "origin",
+          "dataset_id",
+          "planes_available",
+          "series_count",
+          "analysis_status"
+        ],
+        "title": "StudySummary",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Knee MRI research review prototype. Not for diagnosis. Contract schema 0.1.0.",
+    "title": "KneeScope API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/findings": {
+      "get": {
+        "operationId": "findings_findings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindingProfile"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Findings",
+        "tags": [
+          "findings"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Healthz",
+        "tags": [
+          "service"
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "operationId": "metrics_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricsSnapshot"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Metrics",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/model-card": {
+      "get": {
+        "operationId": "model_card_model_card_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelCard"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Model Card",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/predictions": {
+      "post": {
+        "operationId": "predict_predictions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PredictionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PredictionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Predict",
+        "tags": [
+          "predictions"
+        ]
+      }
+    },
+    "/studies": {
+      "get": {
+        "operationId": "studies_studies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Studies",
+        "tags": [
+          "studies"
+        ]
+      }
+    },
+    "/studies/{study_id}": {
+      "get": {
+        "operationId": "study_studies__study_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "study_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9._-]{1,128}$",
+              "title": "Study Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Study",
+        "tags": [
+          "studies"
+        ]
+      }
+    },
+    "/studies/{study_id}/explanations/{finding_id}": {
+      "get": {
+        "operationId": "explanation_studies__study_id__explanations__finding_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "study_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9._-]{1,128}$",
+              "title": "Study Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "finding_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9._-]{1,128}$",
+              "title": "Finding Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prediction_id",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Prediction Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Explanation"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Explanation",
+        "tags": [
+          "predictions"
+        ]
+      }
+    },
+    "/studies/{study_id}/labels": {
+      "get": {
+        "operationId": "labels_studies__study_id__labels_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "study_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9._-]{1,128}$",
+              "title": "Study Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyLabels"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Labels",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
+    "/studies/{study_id}/series/{series_id}/slices/{index}": {
+      "get": {
+        "operationId": "slice_png_studies__study_id__series__series_id__slices__index__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "study_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9._-]{1,128}$",
+              "title": "Study Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "series_id",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9._-]{1,128}$",
+              "title": "Series Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "minimum": 0,
+              "title": "Index",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/png": {}
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "summary": "Slice Png",
+        "tags": [
+          "studies"
+        ]
+      }
+    }
+  }
+}

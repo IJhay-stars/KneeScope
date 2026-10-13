@@ -1,0 +1,21 @@
+{
+  "body": {
+    "calibration": "not_assessed",
+    "created_at": null,
+    "dataset_id": null,
+    "grouping_unit": null,
+    "inference": null,
+    "macro_roc_auc": null,
+    "model": null,
+    "n_studies": null,
+    "origin": "fixture",
+    "partition": null,
+    "per_finding": [],
+    "preprocessing": null,
+    "reason": "No checkpoint has been trained and evaluated. Metrics are never fabricated; this snapshot stays unavailable until KS-EVAL-03 publishes a real one.",
+    "schema_version": "0.1.0",
+    "split_method": null,
+    "status": "unavailable"
+  },
+  "status": 200
+}

@@ -1,0 +1,25 @@
+{
+  "body": {
+    "attention": [],
+    "coordinate_space": "rendered_slice_pixels",
+    "finding_id": "mcl",
+    "kind": null,
+    "model_version": "fixture-0",
+    "notice": "Shows what influenced the model score; it does not localise an injury.",
+    "plane": null,
+    "prediction_id": "fx-pred-fx-study-001-interaction_prototype",
+    "reason": {
+      "code": "EXPLANATION_UNAVAILABLE",
+      "message": "No explanation was produced for this finding."
+    },
+    "rendered_height": null,
+    "rendered_width": null,
+    "schema_version": "0.1.0",
+    "series_id": null,
+    "slices": [],
+    "source": "fixture",
+    "status": "unavailable",
+    "study_id": "fx-study-001"
+  },
+  "status": 200
+}

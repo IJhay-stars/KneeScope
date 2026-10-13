@@ -1,0 +1,64 @@
+{
+  "body": {
+    "analysis_status": "not_run",
+    "dataset_id": null,
+    "display_label": "Fixture study 001",
+    "missing_planes": [],
+    "origin": "fixture",
+    "planes_available": [
+      "sagittal",
+      "coronal",
+      "axial"
+    ],
+    "series": [
+      {
+        "description": "Sag PD FS (fixture)",
+        "fat_suppressed": true,
+        "fluid_sensitive": true,
+        "num_slices": 30,
+        "plane": "sagittal",
+        "rendered_height": 256,
+        "rendered_width": 256,
+        "series_id": "fx-ser-01",
+        "slice_order": "synthetic"
+      },
+      {
+        "description": "Sag T1 (fixture)",
+        "fat_suppressed": false,
+        "fluid_sensitive": false,
+        "num_slices": 24,
+        "plane": "sagittal",
+        "rendered_height": 256,
+        "rendered_width": 256,
+        "series_id": "fx-ser-04",
+        "slice_order": "synthetic"
+      },
+      {
+        "description": "Cor PD FS (fixture)",
+        "fat_suppressed": true,
+        "fluid_sensitive": true,
+        "num_slices": 28,
+        "plane": "coronal",
+        "rendered_height": 256,
+        "rendered_width": 256,
+        "series_id": "fx-ser-02",
+        "slice_order": "synthetic"
+      },
+      {
+        "description": "Ax PD FS (fixture)",
+        "fat_suppressed": true,
+        "fluid_sensitive": true,
+        "num_slices": 32,
+        "plane": "axial",
+        "rendered_height": 256,
+        "rendered_width": 256,
+        "series_id": "fx-ser-03",
+        "slice_order": "synthetic"
+      }
+    ],
+    "series_count": 4,
+    "study_id": "fx-study-001",
+    "warnings": []
+  },
+  "status": 200
+}

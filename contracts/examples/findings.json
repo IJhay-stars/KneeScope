@@ -1,0 +1,31 @@
+{
+  "body": {
+    "dataset_id": null,
+    "findings": [
+      {
+        "description": "Anterior cruciate ligament injury (RSNA label 'ACL').",
+        "display_name": "ACL",
+        "finding_id": "acl"
+      },
+      {
+        "description": "Medial collateral ligament injury (RSNA label 'MCL').",
+        "display_name": "MCL",
+        "finding_id": "mcl"
+      },
+      {
+        "description": "Medial meniscus tear (RSNA label 'Medial Meniscus').",
+        "display_name": "Medial meniscus",
+        "finding_id": "medial_meniscus"
+      },
+      {
+        "description": "Lateral meniscus tear (RSNA label 'Lateral Meniscus').",
+        "display_name": "Lateral meniscus",
+        "finding_id": "lateral_meniscus"
+      }
+    ],
+    "note": "No usable training data. The product is an interaction prototype; every result is a fixture and no detection claim is made.",
+    "profile_id": "interaction_prototype",
+    "status": "fixture_only"
+  },
+  "status": 200
+}

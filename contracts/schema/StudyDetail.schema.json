@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "AnalysisStatus": {
+      "enum": [
+        "not_run",
+        "cached",
+        "failed"
+      ],
+      "title": "AnalysisStatus",
+      "type": "string"
+    },
+    "DataOrigin": {
+      "description": "Where a study or artifact came from.",
+      "enum": [
+        "fixture",
+        "dataset"
+      ],
+      "title": "DataOrigin",
+      "type": "string"
+    },
+    "Plane": {
+      "enum": [
+        "sagittal",
+        "coronal",
+        "axial"
+      ],
+      "title": "Plane",
+      "type": "string"
+    },
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "Machine-readable code, usually an ErrorCode value.",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "description": "Plain-language explanation safe to show to a reviewer.",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "SeriesSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "fat_suppressed": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fat Suppressed"
+        },
+        "fluid_sensitive": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fluid Sensitive"
+        },
+        "num_slices": {
+          "minimum": 1,
+          "title": "Num Slices",
+          "type": "integer"
+        },
+        "plane": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Plane"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "None when the plane could not be determined."
+        },
+        "rendered_height": {
+          "minimum": 1,
+          "title": "Rendered Height",
+          "type": "integer"
+        },
+        "rendered_width": {
+          "description": "Width in px of PNGs from the slice endpoint.",
+          "minimum": 1,
+          "title": "Rendered Width",
+          "type": "integer"
+        },
+        "series_id": {
+          "title": "Series Id",
+          "type": "string"
+        },
+        "slice_order": {
+          "$ref": "#/$defs/SliceOrder"
+        }
+      },
+      "required": [
+        "series_id",
+        "plane",
+        "num_slices",
+        "slice_order",
+        "rendered_width",
+        "rendered_height"
+      ],
+      "title": "SeriesSummary",
+      "type": "object"
+    },
+    "SliceOrder": {
+      "description": "How slice_index 0..n-1 was ordered for a series.",
+      "enum": [
+        "patient_position",
+        "instance_number",
+        "dataset_provided",
+        "synthetic"
+      ],
+      "title": "SliceOrder",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis_status": {
+      "$ref": "#/$defs/AnalysisStatus"
+    },
+    "dataset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataset Id"
+    },
+    "display_label": {
+      "title": "Display Label",
+      "type": "string"
+    },
+    "missing_planes": {
+      "items": {
+        "$ref": "#/$defs/Plane"
+      },
+      "title": "Missing Planes",
+      "type": "array"
+    },
+    "origin": {
+      "$ref": "#/$defs/DataOrigin"
+    },
+    "planes_available": {
+      "items": {
+        "$ref": "#/$defs/Plane"
+      },
+      "title": "Planes Available",
+      "type": "array"
+    },
+    "series": {
+      "items": {
+        "$ref": "#/$defs/SeriesSummary"
+      },
+      "title": "Series",
+      "type": "array"
+    },
+    "series_count": {
+      "minimum": 0,
+      "title": "Series Count",
+      "type": "integer"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "$ref": "#/$defs/Reason"
+      },
+      "title": "Warnings",
+      "type": "array"
+    }
+  },
+  "required": [
+    "study_id",
+    "display_label",
+    "origin",
+    "dataset_id",
+    "planes_available",
+    "series_count",
+    "analysis_status",
+    "series",
+    "missing_planes"
+  ],
+  "title": "StudyDetail",
+  "type": "object"
+}

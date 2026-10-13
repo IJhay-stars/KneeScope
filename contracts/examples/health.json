@@ -1,0 +1,13 @@
+{
+  "body": {
+    "api_version": "0.1.0",
+    "finding_profile": "interaction_prototype",
+    "mode": "fixture",
+    "model_loaded": false,
+    "model_version": null,
+    "preprocessing_version": "prep-0.0.0-placeholder",
+    "schema_version": "0.1.0",
+    "status": "ok"
+  },
+  "status": 200
+}

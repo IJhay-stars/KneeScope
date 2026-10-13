@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "AnalysisStatus": {
+      "enum": [
+        "not_run",
+        "cached",
+        "failed"
+      ],
+      "title": "AnalysisStatus",
+      "type": "string"
+    },
+    "DataOrigin": {
+      "description": "Where a study or artifact came from.",
+      "enum": [
+        "fixture",
+        "dataset"
+      ],
+      "title": "DataOrigin",
+      "type": "string"
+    },
+    "Plane": {
+      "enum": [
+        "sagittal",
+        "coronal",
+        "axial"
+      ],
+      "title": "Plane",
+      "type": "string"
+    },
+    "StudySummary": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_status": {
+          "$ref": "#/$defs/AnalysisStatus"
+        },
+        "dataset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Dataset Id"
+        },
+        "display_label": {
+          "title": "Display Label",
+          "type": "string"
+        },
+        "origin": {
+          "$ref": "#/$defs/DataOrigin"
+        },
+        "planes_available": {
+          "items": {
+            "$ref": "#/$defs/Plane"
+          },
+          "title": "Planes Available",
+          "type": "array"
+        },
+        "series_count": {
+          "minimum": 0,
+          "title": "Series Count",
+          "type": "integer"
+        },
+        "study_id": {
+          "title": "Study Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "study_id",
+        "display_label",
+        "origin",
+        "dataset_id",
+        "planes_available",
+        "series_count",
+        "analysis_status"
+      ],
+      "title": "StudySummary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "origin_notice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Origin Notice"
+    },
+    "studies": {
+      "items": {
+        "$ref": "#/$defs/StudySummary"
+      },
+      "title": "Studies",
+      "type": "array"
+    }
+  },
+  "required": [
+    "studies"
+  ],
+  "title": "StudyList",
+  "type": "object"
+}
