@@ -1,0 +1,133 @@
+[[issue]]
+id = "KS-OPS-01"
+title = "Restricted-asset protection: data, checkpoints, logs and repository guards"
+epic = "KS-EPIC-QUALITY"
+type = "task"
+priority = "P0"
+workstream = "operations"
+owner_role = "Backend/serving with QA reviewer"
+depends_on = []
+problem = """Competition data may not be redistributed, reports may be sensitive, and checkpoints are large. The scaffold ignores data/ and artifacts/, but nothing yet stops a DICOM, report text or a large binary from being committed or logged."""
+outcome = """A CI and local guard (scripts/check_restricted_assets.py) that fails on DICOM/NIfTI/npz/pt/ckpt files, files over 5 MB, or tracked paths under data/ or artifacts/; API logging that never records request bodies, report text or data paths; documented rules in docs/security.md."""
+scope = ["Guard script and CI step.", "Logging review of api/ and ml/ for paths and payloads; tests capturing logs.", "docs/security.md: what may be committed, shared, hosted, recorded; incident steps (Kaggle rule: notify on unauthorised access)."]
+exclusions = ["Authentication, accounts (out of scope)."]
+guidance = """The repository PDFs are design inputs and allowed. Allow-list explicit exceptions in the script with a reason."""
+files = ["scripts/check_restricted_assets.py", ".github/workflows/ci.yml", "docs/security.md", "tests/test_restricted_assets.py"]
+contract_impact = "None."
+acceptance = ["Guard fails on a test repo containing a .dcm file, a 6 MB file, and a file under artifacts/ (test).", "CI runs the guard on every PR.", "API test captures logs for a failing prediction and asserts no data root path or request body appears.", "docs/security.md lists the RSNA data-security obligations with the rules link."]
+verification = ["python scripts/check_restricted_assets.py", "pytest tests/test_restricted_assets.py"]
+docs = ["docs/security.md", "AGENTS.md (protected assets section link)"]
+dod = ["QA reviewer confirmed CI blocks a seeded violation."]
+
+[[issue]]
+id = "KS-OPS-02"
+title = "Reproducible local container setup for API and web"
+epic = "KS-EPIC-QUALITY"
+type = "task"
+priority = "P1"
+workstream = "operations"
+owner_role = "Backend/serving"
+depends_on = ["KS-API-02"]
+problem = """The plan requires one reproducible local or container setup. Judges or teammates must be able to run the app without the authors' machines, with data and checkpoints mounted rather than baked in."""
+outcome = """Dockerfile (API, CPU torch), web static build served by the API or a small static server, docker-compose.yml with read-only mounts for manifest, data subset, checkpoint and cache; fixture mode works with no mounts."""
+scope = ["Multi-stage builds pinned to lockfiles.", "Compose profiles: fixture (no mounts) and model (mounts).", "Healthcheck on /healthz.", "Image contains no data or checkpoints (verified)."]
+exclusions = ["Kubernetes, cloud registries, GPU images."]
+guidance = """Use `uv sync --frozen` and `pnpm install --frozen-lockfile`. Document image size."""
+files = ["Dockerfile", "docker-compose.yml", ".dockerignore", "README.md"]
+contract_impact = "None."
+acceptance = ["`docker compose --profile fixture up` serves the web app and /healthz returns mode 'fixture' on a clean clone.", "`docker compose --profile model up` with mounts returns model_loaded true.", "`docker run --rm <image> find / -name '*.dcm' -o -name '*.pt'` finds nothing.", "README documents both profiles."]
+verification = ["docker compose --profile fixture up -d && curl -fs localhost:8000/healthz", "docker compose --profile model up -d && curl -fs localhost:8000/healthz"]
+docs = ["README.md", "docs/architecture.md (deployment)"]
+dod = ["A teammate ran it from a clean clone (KS-DOC-01 evidence)."]
+
+[[issue]]
+id = "KS-OPS-03"
+title = "Measure inference latency, peak memory and slice-serving latency"
+epic = "KS-EPIC-QUALITY"
+type = "task"
+priority = "P1"
+workstream = "operations"
+owner_role = "Backend/serving with Evaluation reviewer"
+depends_on = ["KS-API-02"]
+problem = """Whether synchronous inference is sufficient must be measured, not assumed. The metrics page also reports latency and peak memory on stated hardware."""
+outcome = """scripts/benchmark_inference.py measures p50/p95 latency and peak RSS over ≥20 runs per study on the target demo hardware, plus slice endpoint latency; results stored as InferenceMeasurement and a decision on sync vs job-and-poll."""
+scope = ["Benchmark live path end to end (HTTP) and model-only.", "Record hardware (CPU model, RAM, GPU none/yes).", "Compare p95 with serving.request_timeout_s.", "Decision entry."]
+exclusions = ["Optimisation work unless p95 exceeds the limit."]
+guidance = """Warm-up runs excluded and stated. Same checkpoint and preprocessing as served."""
+files = ["scripts/benchmark_inference.py", "docs/decisions.md", "artifacts/metrics/ (inference section)"]
+contract_impact = "Fills MetricsSnapshot.inference."
+acceptance = ["Benchmark output includes n_runs ≥ 20, p50, p95, peak memory MB, hardware string.", "Decision entry: sync kept or KS-OPS-04 triggered, citing p95 vs request_timeout_s.", "InferenceMeasurement validates and appears on the evaluation page."]
+verification = ["python scripts/benchmark_inference.py --runs 20 --url http://localhost:8000"]
+docs = ["docs/decisions.md", "docs/model-card.md"]
+dod = ["KS-OPS-04 marked triggered or not triggered in docs/issue-index.md."]
+[issue.science]
+dataset = "Demo manifest studies."
+partition = "Not applicable (operational)."
+metrics = "Latency p50/p95, peak memory."
+cannot_claim = "Performance on other hardware."
+artifacts = "Benchmark JSON with hardware string and git SHA."
+
+[[issue]]
+id = "KS-OPS-04"
+title = "[Conditional] Minimal job-and-poll inference flow"
+epic = "KS-EPIC-QUALITY"
+type = "conditional"
+priority = "P2"
+workstream = "operations"
+owner_role = "Backend/serving"
+depends_on = ["KS-OPS-03"]
+trigger = "Triggered only if KS-OPS-03 shows p95 end-to-end latency above serving.request_timeout_s on the demo hardware."
+problem = """Long synchronous requests may time out in browsers or proxies."""
+outcome = """POST /predictions returns 202 {job_id, status, poll_url} when serving.mode='job'; GET /predictions/jobs/{job_id} returns status until the PredictionResponse is ready; implemented with an in-process worker and an in-memory/file job table, no external queue."""
+scope = ["Job contract added to kneescope_contracts (additive minor version).", "In-process background execution with one worker.", "Job expiry and failure states.", "Tests."]
+exclusions = ["Redis, Celery, external queues, multiple workers."]
+guidance = """Follow contracts/README.md §6 'Future job-and-poll extension'. The PredictionResponse contract does not change."""
+files = ["contracts/kneescope_contracts/models.py", "api/kneescope_api/jobs.py", "tests/api/test_jobs.py", "contracts/README.md"]
+contract_impact = "Adds PredictionJob model (minor version bump); consumers: web (KS-WEB-08)."
+acceptance = ["Test: 202 then polling returns 200 with a PredictionResponse identical in shape to the sync path.", "Test: job failure returns ApiError with INFERENCE_FAILED.", "serving.mode='sync' behaviour unchanged (existing tests pass)."]
+verification = ["pytest tests/api/test_jobs.py", "python scripts/export_contracts.py --check"]
+docs = ["contracts/README.md §6", "docs/architecture.md"]
+dod = ["Web owner acknowledged the contract change."]
+
+[[issue]]
+id = "KS-OPS-05"
+title = "[Conditional] Permitted deployment of a hosted demo"
+epic = "KS-EPIC-QUALITY"
+type = "conditional"
+priority = "P2"
+workstream = "operations"
+owner_role = "Backend/serving with Coordinator approval"
+depends_on = ["KS-SCOPE-01", "KS-DATA-04", "KS-OPS-01", "KS-OPS-02"]
+trigger = "Triggered only if KS-SCOPE-01 shows the organizers require a live link AND the KS-DATA-01/02 permitted-use table allows public hosting of the images to be shown (otherwise fixture-mode-only hosting, or no hosting)."
+problem = """A public link may be required, but competition data may not be made available to non-participants."""
+outcome = """A hosted deployment on a free or already-approved platform, serving only content the terms allow (possibly fixture mode only), with access restrictions if required; approved by the coordinator before going public."""
+scope = ["Choose platform without new paid subscriptions unless approved.", "Deploy the container from KS-OPS-02.", "Verify what is publicly reachable."]
+exclusions = ["Publishing restricted data.", "Spending money or accepting platform terms without human approval."]
+guidance = """An agent prepares the deployment but a human approves and performs the publish step."""
+files = ["docs/deployment.md"]
+contract_impact = "None."
+acceptance = ["docs/deployment.md lists exactly what is hosted, the permission basis, and who approved.", "From an unauthenticated browser, only permitted content is reachable (checked list of URLs).", "/healthz reports the expected mode."]
+verification = ["curl -fs https://<host>/healthz"]
+docs = ["docs/deployment.md", "README.md"]
+dod = ["Coordinator approval recorded."]
+
+[[issue]]
+id = "KS-QA-01"
+title = "End-to-end integration tests for fixture and model modes"
+epic = "KS-EPIC-QUALITY"
+type = "task"
+priority = "P0"
+workstream = "qa"
+owner_role = "Independent reviewer/QA"
+depends_on = ["KS-API-02", "KS-WEB-03"]
+problem = """Unit tests on each side do not prove the workflow works together: select a study, view slices, run analysis, see provenance, reveal a label, open evaluation."""
+outcome = """An automated end-to-end check (Playwright or a scripted HTTP + DOM test) running the full workflow against fixture mode in CI and against model mode with the tiny test checkpoint, plus contract agreement checks between API responses and web types."""
+scope = ["E2E workflow test.", "Model-mode run in CI with generated synthetic DICOM and tiny checkpoint.", "Assert provenance badges match API source."]
+exclusions = ["Visual regression tooling."]
+guidance = """Playwright is acceptable if its browser download works in CI; otherwise use the API + Vitest DOM test approach and record why."""
+files = ["tests/e2e/", ".github/workflows/ci.yml"]
+contract_impact = "None."
+acceptance = ["CI job runs the workflow in fixture mode and asserts the FIXTURE badge and five-state rendering.", "CI job runs model mode with the tiny checkpoint and asserts the LIVE badge and latency.", "Failure of any step fails CI."]
+verification = ["pnpm --dir tests/e2e test (or documented command)", "GitHub Actions run link"]
+docs = ["README.md 'Testing'", "AGENTS.md verification table if commands change"]
+dod = ["Green CI run linked."]

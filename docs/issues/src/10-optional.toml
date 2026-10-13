@@ -1,0 +1,160 @@
+# Optional enhancements: only after the core (P0/P1) is done and only if the owner of the
+# affected workstream agrees. None of these block delivery.
+
+[[issue]]
+id = "KS-OPT-01"
+title = "[Optional] Upload support for user-supplied studies"
+epic = "KS-EPIC-API"
+type = "optional"
+priority = "P2"
+workstream = "backend"
+owner_role = "Backend/serving with Coordinator approval"
+depends_on = ["KS-API-02", "KS-OPS-01"]
+problem = """The plan lists general upload as 'add after the core works'. Uploads raise privacy, permission and robustness questions."""
+outcome = """Local-only upload of a DICOM study (zip) processed through the same adapter rules, never persisted beyond the session, never logged, rejected if not de-identified per a documented check."""
+scope = ["Size and type limits.", "Temporary storage with deletion.", "Same preprocessing and error mapping."]
+exclusions = ["Public hosting with upload enabled.", "PHI handling claims."]
+guidance = """Requires a decision entry approving it after the core is complete."""
+files = ["api/kneescope_api/upload.py", "web/src/pages/UploadPage.tsx", "tests/api/test_upload.py"]
+contract_impact = "Adds an upload endpoint and response (minor version)."
+acceptance = ["Upload of a synthetic DICOM zip yields a temporary study that predicts via the live path (test).", "Temporary files are deleted after the session or 1 hour (test).", "Upload of a file containing PatientName is rejected (test)."]
+verification = ["pytest tests/api/test_upload.py"]
+docs = ["docs/security.md", "contracts/README.md"]
+dod = ["Decision entry approving the feature exists."]
+
+[[issue]]
+id = "KS-OPT-02"
+title = "[Optional] Reviewer notes per study"
+epic = "KS-EPIC-WEB"
+type = "optional"
+priority = "P2"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = ["KS-WEB-03"]
+problem = """Researchers may want to note observations while reviewing."""
+outcome = """Local-only notes per study (browser storage), clearly separate from labels and predictions, exportable as text."""
+scope = ["Notes panel.", "Local storage with try/catch.", "Export."]
+exclusions = ["Server-side storage or a database."]
+guidance = """Never send notes to the API."""
+files = ["web/src/components/notes/"]
+contract_impact = "None."
+design_refs = ["DESIGN.md §9 (add a Notes component spec first)"]
+acceptance = ["Notes persist across reload in the same browser (test with mocked storage).", "No network request contains note text (test)."]
+verification = ["pnpm --dir web test"]
+docs = ["DESIGN.md (component spec)"]
+dod = ["Design spec updated."]
+
+[[issue]]
+id = "KS-OPT-03"
+title = "[Optional] Exploratory threshold slider per finding"
+epic = "KS-EPIC-WEB"
+type = "optional"
+priority = "P2"
+workstream = "frontend"
+owner_role = "Design/frontend with Evaluation reviewer"
+depends_on = ["KS-EVAL-02", "KS-WEB-06"]
+problem = """PRD lists a threshold slider as 'should ship'. It helps show trade-offs but can suggest that any threshold is validated."""
+outcome = """On the evaluation page only, a slider per finding showing sensitivity/specificity at the chosen threshold from precomputed validation operating points, with the validated threshold marked."""
+scope = ["Operating points exported by evaluation.", "Slider on evaluation page.", "Label 'exploratory'."]
+exclusions = ["Changing thresholds used by predictions in the review view."]
+guidance = """Operating points come from validation only."""
+files = ["web/src/components/ledger/ThresholdExplorer.tsx", "ml/kneescope_ml/evaluation.py"]
+contract_impact = "Adds optional operating_points to FindingMetrics (minor version)."
+design_refs = ["DESIGN.md §9.11"]
+acceptance = ["Slider values match exported operating points (test).", "Review-view predictions unaffected (test)."]
+verification = ["pnpm --dir web test", "pytest tests/ml/test_evaluation.py"]
+docs = ["DESIGN.md §9.11", "contracts/README.md §9"]
+dod = ["Evaluation owner reviewed wording."]
+
+[[issue]]
+id = "KS-OPT-04"
+title = "[Optional] Exportable research summary"
+epic = "KS-EPIC-WEB"
+type = "optional"
+priority = "P2"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = ["KS-WEB-03", "KS-WEB-06"]
+problem = """A per-study summary (scores, provenance, versions, revealed labels, limitations) may help reviewers, but must carry all caveats."""
+outcome = """Printable/Markdown export containing provenance, versions, research-use notice and limitations; no images unless permitted."""
+scope = ["Export view or Markdown download."]
+exclusions = ["PDF reports styled like clinical reports."]
+guidance = """Must not resemble a radiology report."""
+files = ["web/src/components/export/"]
+contract_impact = "None."
+design_refs = ["DESIGN.md §17 prohibited patterns"]
+acceptance = ["Export includes source, model version, checkpoint SHA, preprocessing version and the research notice (test).", "Fixture results export with 'FIXTURE — not a model output' (test)."]
+verification = ["pnpm --dir web test"]
+docs = ["DESIGN.md"]
+dod = ["QA reviewed wording."]
+
+[[issue]]
+id = "KS-OPT-05"
+title = "[Optional] Server-side true window/level rendering"
+epic = "KS-EPIC-API"
+type = "optional"
+priority = "P2"
+workstream = "backend"
+owner_role = "Backend/serving with Design/frontend"
+depends_on = ["KS-API-01"]
+problem = """Display adjust on PNGs is not MRI window/level. True window/level needs intensity data rendered server-side."""
+outcome = """Slice endpoint accepts window centre/width in stored-value units and renders accordingly; UI labels it 'Window/level' only when this endpoint is used."""
+scope = ["Query parameters with validation.", "UI control switch."]
+exclusions = ["Client-side raw intensity transfer."]
+guidance = """Keep 'Display adjust' as the default."""
+files = ["api/kneescope_api/main.py", "ml/kneescope_ml/render.py", "web/src/components/viewer/"]
+contract_impact = "Additive query parameters on the slice endpoint."
+design_refs = ["DESIGN.md §14"]
+acceptance = ["Rendering with a given window matches a numpy reference (test).", "UI label switches only when server window/level is active (test)."]
+verification = ["pytest tests/api", "pnpm --dir web test"]
+docs = ["DESIGN.md §14", "contracts/README.md §3"]
+dod = ["Design spec updated."]
+
+[[issue]]
+id = "KS-OPT-06"
+title = "[Optional] Additional supported findings"
+epic = "KS-EPIC-MODEL"
+type = "optional"
+priority = "P2"
+workstream = "modelling"
+owner_role = "Modelling with Evaluation"
+depends_on = ["KS-EVAL-03"]
+problem = """More findings may be supportable (e.g. other RSNA labels) if labels and counts allow."""
+outcome = """A new profile version adding findings that pass the KS-DATA-04 minimum-count rule, trained and evaluated with the same pipeline."""
+scope = ["Audit counts.", "Profile update via contract change.", "Train/evaluate."]
+exclusions = ["Findings without legitimate labels."]
+guidance = """Treat as a full repeat of MODEL-03/EVAL-03 for the new heads."""
+files = ["contracts/findings.json", "config/train.toml"]
+contract_impact = "findings.json profile change (contract change procedure)."
+acceptance = ["Each added finding has audit counts meeting the rule.", "Metrics snapshot includes the new findings with counts."]
+verification = ["python scripts/export_contracts.py --check", "python scripts/evaluate.py ..."]
+docs = ["docs/decisions.md", "docs/model-card.md"]
+dod = ["Consumers acknowledged."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "Same partitions as the baseline."
+metrics = "Same as KS-EVAL-03."
+cannot_claim = "Performance for findings below the count rule."
+artifacts = "Run and snapshot for the extended model."
+
+[[issue]]
+id = "KS-OPT-07"
+title = "[Optional] Slice thumbnail strip in the viewer"
+epic = "KS-EPIC-WEB"
+type = "optional"
+priority = "P2"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = ["KS-WEB-02"]
+problem = """A thumbnail strip (as in the reference concept) helps orientation but costs requests and space."""
+outcome = """Lazy-loaded strip of neighbouring slices under the controls, keyboard accessible, hidden below 900px."""
+scope = ["Strip component with lazy loading."]
+exclusions = ["Thumbnails of other studies."]
+guidance = """Use the same slice endpoint; no new API."""
+files = ["web/src/components/viewer/ThumbnailStrip.tsx"]
+contract_impact = "None."
+design_refs = ["DESIGN.md §6 (thumbnail strip optional)", "DESIGN.md §15"]
+acceptance = ["Selecting a thumbnail sets the slice (test).", "No more than 9 thumbnail requests in flight (test)."]
+verification = ["pnpm --dir web test"]
+docs = ["DESIGN.md §9.5"]
+dod = ["Screenshots in PR."]
