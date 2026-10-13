@@ -10,6 +10,7 @@ dependencies = [
   "pydantic>=2.8",
   "numpy>=1.26",
   "pillow>=10.4",
+  "pydantic-settings>=2", # used by the original src/knee_api scaffold
 ]
 
 [project.optional-dependencies]
@@ -19,7 +20,14 @@ ml = [
   "torchvision>=0.18",
   "pydicom>=2.4",
   "scikit-learn>=1.5",
+  # also used by the original src/kneeml scaffold
+  "SimpleITK>=2.3",
+  "pandas>=2.2",
+  "pyyaml>=6",
 ]
+# Kept so the original Makefile's `pip install -e ".[dev]"` keeps working; uv users get
+# the same tools from [dependency-groups].dev.
+dev = ["pytest>=8.2", "httpx>=0.27", "ruff>=0.6", "mypy>=1.11", "jsonschema>=4.23", "pre-commit>=3.7"]
 
 [dependency-groups]
 dev = [
@@ -35,10 +43,10 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["contracts/kneescope_contracts", "ml/kneescope_ml", "api/kneescope_api"]
+packages = ["contracts/kneescope_contracts", "ml/kneescope_ml", "api/kneescope_api", "src/knee_api", "src/kneeml"]
 
 [tool.hatch.build]
-dev-mode-dirs = ["contracts", "ml", "api"]
+dev-mode-dirs = ["contracts", "ml", "api", "src"]
 
 [tool.ruff]
 line-length = 110
@@ -64,10 +72,21 @@ packages = ["kneescope_contracts", "kneescope_ml", "kneescope_api"]
 plugins = ["pydantic.mypy"]
 warn_unused_ignores = false
 
+# The original main-branch scaffold keeps its own, non-strict settings.
+[[tool.mypy.overrides]]
+module = ["knee_api.*", "kneeml.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+disallow_any_generics = false
+warn_return_any = false
+check_untyped_defs = true
+ignore_missing_imports = true
+
 [[tool.mypy.overrides]]
 module = ["torch.*", "torchvision.*", "pydicom.*", "sklearn.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q --import-mode=importlib"

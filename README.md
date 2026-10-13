@@ -57,6 +57,18 @@ mypy, pytest, contract drift check, and web lint/typecheck/format/test/build. CI
 | [`docs/issue-index.md`](docs/issue-index.md) | Backlog overview, first ready issues, critical path |
 | [`docs/model-card.md`](docs/model-card.md), [`docs/data-audit.md`](docs/data-audit.md) | Templates to fill from evidence |
 
+## Two scaffolds in this repository
+
+This branch merges the team's original scaffold from `main` without removing anything:
+`src/knee_api` (FastAPI), `src/kneeml` (ML package), `docs/contracts/01–07` (contract
+templates), `docker/`, `docker-compose.yml`, `Makefile`, `.pre-commit-config.yaml` and
+`.github/CODEOWNERS`. Its original tagline was "MRI-PREDICTOR — building a model MRI
+predictor to scan and detect MRI knee images".
+
+The KneeScope layout (`api/`, `ml/`, `contracts/`, `web/`) is the one documented above. The
+team should choose one layout per area and retire the other; until then both are
+importable and both test suites run in CI. See `docs/decisions.md` D-011.
+
 ## Run modes
 
 | Mode | How | Results |

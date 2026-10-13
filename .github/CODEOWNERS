@@ -1,0 +1,10 @@
+# This are the contributors of the project
+
+/src/kneeml/data/       @JesuYiwola
+/src/kneeml/models/     @DaviStyle
+/src/kneeml/training/   @anasabubakar
+/src/kneeml/eval/       @mfon9
+/src/kneeml/inference/  @mfon9 @JesuYiwola
+/src/knee_api/          @Ijhay-stars
+/web/                   @okeowovictor
+/docs/contracts/        @okeowovictor @Ijhay-stars @mfon9 @JesuYiwola @DaviStyle
