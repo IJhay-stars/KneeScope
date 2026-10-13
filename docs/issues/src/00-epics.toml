@@ -1,0 +1,48 @@
+# Epics group actionable issues. They carry no acceptance criteria of their own beyond
+# "all child issues closed with evidence". Source of truth for the backlog; render with
+# `python scripts/backlog.py render`.
+
+[[epic]]
+id = "KS-EPIC-SCOPE"
+title = "Epic: Product scope, team ownership and organizer requirements"
+summary = "Pin down what must be delivered, to whom, by which deliverable format, and who owns which workstream, so the rest of the backlog has fixed targets."
+
+[[epic]]
+id = "KS-EPIC-DATA"
+title = "Epic: Data access, audit, adapters and shared preprocessing"
+summary = "Obtain permitted data, audit it, select the dataset and finding profile, and build the one preprocessing path used by training, evaluation and serving."
+
+[[epic]]
+id = "KS-EPIC-LABELS"
+title = "Epic: Labels and explainability"
+summary = "Produce label files with provenance and unknown handling, extract report labels only if required, and provide optional, correctly named and aligned explanations."
+
+[[epic]]
+id = "KS-EPIC-MODEL"
+title = "Epic: Modelling"
+summary = "A reproducible training pipeline, a simple comparator, one honest baseline model, and a verified packaged checkpoint for serving."
+
+[[epic]]
+id = "KS-EPIC-EVAL"
+title = "Epic: Evaluation, model card and cached results"
+summary = "Metrics with sample counts on a documented partition, threshold selection, error analysis, optional calibration, the model card, and precomputed demo predictions."
+
+[[epic]]
+id = "KS-EPIC-API"
+title = "Epic: Backend and serving"
+summary = "Replace fixture-only routes with the real catalogue, live inference through shared preprocessing, explanations, labels, metrics and a provenance-preserving cache."
+
+[[epic]]
+id = "KS-EPIC-WEB"
+title = "Epic: Frontend review workflow"
+summary = "Study browser, review workspace, finding states, label reveal, explanations and the evaluation ledger, built to DESIGN.md."
+
+[[epic]]
+id = "KS-EPIC-QUALITY"
+title = "Epic: Security, performance, testing and operations"
+summary = "Restricted-asset protection, latency and memory measurement, conditional job-and-poll, reproducible container setup, permitted deployment if required, and end-to-end verification."
+
+[[epic]]
+id = "KS-EPIC-DELIVERY"
+title = "Epic: Documentation, demo and final delivery"
+summary = "Reproducible README, demo cases and script, recorded fallback, final delivery package and an independent completion review."
