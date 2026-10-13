@@ -1,0 +1,63 @@
+[[issue]]
+id = "KS-SCOPE-01"
+title = "Confirm organizer submission requirements, judging criteria and deadline"
+epic = "KS-EPIC-SCOPE"
+type = "decision"
+priority = "P0"
+workstream = "coordination"
+owner_role = "Coordinator/integrator (human decision)"
+depends_on = []
+problem = """The PRD (§17.8) leaves open what must be submitted (repository, live link, video, slides), by what hour, and how the hackathon is judged. Delivery, deployment and demo issues cannot define 'done' without this."""
+outcome = """docs/decisions.md contains a decision entry quoting the organizer's actual requirements (source, date, who confirmed), and docs/issue-index.md marks which conditional delivery issues (KS-OPS-05 deployment, KS-DEMO-03 recording) are triggered."""
+scope = ["Ask the organizers (or read their published brief) for required deliverables, format, deadline with timezone, and judging criteria.", "Record whether a public live link is required or only a repository/demo.", "Record any rules about data, recordings or third-party datasets."]
+exclusions = ["Do not accept terms, register the team, or submit anything on anyone's behalf as part of this issue.", "Do not create a slide deck (separate task outside this backlog)."]
+guidance = """Quote the organizer source verbatim in the decision entry (link or message reference, no personal contact details). If requirements are unknown, record 'unknown' explicitly and list the follow-up owner; do not assume a live deployment is required."""
+files = ["docs/decisions.md", "docs/issue-index.md"]
+contract_impact = "None."
+acceptance = ["docs/decisions.md has an entry 'Organizer requirements' listing each required deliverable, the deadline with timezone, and judging criteria, each with a source reference or the word 'unknown'.", "KS-OPS-05 and KS-DEMO-03 are marked 'triggered' or 'not triggered' in docs/issue-index.md with a link to the decision entry.", "KS-DEL-01 body is updated with the concrete deliverable checklist."]
+verification = ["Reviewer reads the decision entry and confirms each item has a source or 'unknown'.", "python scripts/backlog.py check"]
+docs = ["docs/decisions.md", "docs/issue-index.md"]
+dod = ["Decision recorded and linked from KS-DEL-01."]
+
+[[issue]]
+id = "KS-SCOPE-02"
+title = "Agree named owners per workstream and record collaboration boundaries"
+epic = "KS-EPIC-SCOPE"
+type = "decision"
+priority = "P0"
+workstream = "coordination"
+owner_role = "Coordinator/integrator (human decision)"
+depends_on = []
+problem = """The project plan proposes ownership by deliverable but notes it is a recommendation, not an accepted assignment. Integration ownership must not silently become responsibility for data, training, backend and everyone's unfinished work."""
+outcome = """The ownership table in AGENTS.md ('Workstreams and ownership') names an accountable person (or 'unassigned') per workstream, with merged roles stated for a team smaller than six, and each person has confirmed their row."""
+scope = ["Fill the owner column of the AGENTS.md workstream table.", "Record merged roles if the team is smaller than six (PRD §17.4 merge pattern or an agreed alternative).", "Name a reviewer from a different workstream for each workstream."]
+exclusions = ["Do not assign issues to people who have not agreed to them."]
+guidance = """Use the role names already in AGENTS.md. Record agreement as a short decision entry with date. Unassigned workstreams stay visibly unassigned; the coordinator does not inherit them by default."""
+files = ["AGENTS.md", "docs/decisions.md"]
+contract_impact = "None."
+acceptance = ["Every row of the AGENTS.md ownership table has a named owner or the literal text 'unassigned'.", "Each named owner has confirmed (decision entry lists confirmations with date).", "Each workstream has a named cross-workstream reviewer or 'unassigned'."]
+verification = ["Reviewer checks the table against the decision entry."]
+docs = ["AGENTS.md", "docs/decisions.md"]
+dod = ["Ownership table merged to main."]
+
+[[issue]]
+id = "KS-SCOPE-03"
+title = "[Conditional] Deliver as an interaction prototype if no usable training data exists"
+epic = "KS-EPIC-SCOPE"
+type = "conditional"
+priority = "P0"
+workstream = "coordination"
+owner_role = "Coordinator/integrator"
+depends_on = ["KS-DATA-04"]
+trigger = "Triggered only if KS-DATA-04 records that no dataset with verified access and usable labels is available in time."
+problem = """Without permitted training data there can be no real model. The product must then be presented honestly as an interaction prototype, with no detection claims and no numbers that look like results."""
+outcome = """The app, README, model card and demo state that KneeScope is an interaction prototype; model, evaluation and cached-prediction issues are closed as 'not applicable' with a link to the decision; fixture mode is the documented run mode."""
+scope = ["Set findings profile 'interaction_prototype' as the documented mode.", "Update README, model card draft and demo script wording.", "Close or relabel MODEL, EVAL-02..07, API-02..04 issues as not applicable with links."]
+exclusions = ["No placeholder scores presented as results.", "No metrics page numbers."]
+guidance = """The fixture banner, hatch pattern and 'FIXTURE — not a model output' text already exist; verify they appear on every result surface. The demo then shows the workflow, the states, and the limitations."""
+files = ["README.md", "docs/model-card.md", "docs/demo-script.md", "contracts/findings.json"]
+contract_impact = "None (uses existing interaction_prototype profile)."
+acceptance = ["README first paragraph states 'interaction prototype' and 'no model'.", "Every prediction shown in the UI carries the FIXTURE badge (checked on all four fixture studies).", "GET /metrics returns status 'unavailable'.", "Each not-applicable issue links to the KS-DATA-04 decision."]
+verification = ["curl -s localhost:8000/metrics | grep '\"unavailable\"'", "pnpm --dir web test"]
+docs = ["README.md", "docs/model-card.md", "docs/demo-script.md", "docs/issue-index.md"]
+dod = ["Decision link present on every closed-as-not-applicable issue."]

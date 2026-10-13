@@ -1,0 +1,251 @@
+[[issue]]
+id = "KS-DATA-01"
+title = "Verify RSNA Knee data access and permitted training, hosting, demo and recording uses"
+epic = "KS-EPIC-DATA"
+type = "decision"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing (human decision; each data handler accepts rules personally)"
+depends_on = []
+problem = """The RSNA Knee Abnormality Detection rules (read 2026-10-13) permit use of the competition data 'for any purpose … including academic research and education' subject to the MIRA license, but also require participants not to 'redistribute or otherwise provide or make available the Competition Data to any party not participating in the Competition'. Access requires each person to accept the rules before the entry deadline (15 October 2026, 23:59 UTC). Hosting rendered slices publicly, showing them in a recorded video, or sharing a demo machine may count as making data available. The dataset is about 570 GB of DICOM, and only a small subset of training studies carry labels."""
+outcome = """docs/data-audit.md §1 records, for RSNA: who has accepted the rules (names, not credentials), the MIRA license terms read (link and date), and an explicit yes/no/unclear for: training, local demo to judges, public hosting of rendered slices, recorded video showing slices, and publishing model weights. Unclear items list the question sent to informatics@rsna.org or Kaggle and its status."""
+scope = ["Read the competition Rules and http://rsna.org/mira-license.", "Each team member who will download or view data accepts the rules themselves (human action).", "Answer each permitted-use question with a quoted clause.", "Record download feasibility (570 GB total; whether a subset can be fetched by study)."]
+exclusions = ["Agents must not accept terms, sign in, or download data on anyone's behalf.", "Do not email organizers without the coordinator's approval of the text."]
+guidance = """Quote clauses; do not paraphrase permissions into broader ones. Treat 'unclear' as 'not permitted' for public hosting and recordings until answered. Note that removing identifying tags does not grant redistribution rights."""
+files = ["docs/data-audit.md", "docs/decisions.md"]
+contract_impact = "None directly; feeds KS-DATA-04."
+acceptance = ["docs/data-audit.md §1 'Access and permitted use' for RSNA has a row for each of: training, evaluation, local demo, public hosting, recording, weight publication — each 'yes', 'no' or 'unclear' with a quoted clause or pending question.", "The list of members who personally accepted the rules is recorded (names only).", "Download feasibility (full or per-study subset) is stated with evidence (command or page reference)."]
+verification = ["Coordinator and one other member review the table against the rules page."]
+docs = ["docs/data-audit.md"]
+dod = ["Table complete; unclear items have an owner and a pending question."]
+[issue.science]
+dataset = "RSNA Knee Abnormality Detection (Kaggle, 2026), Competition Data subject to Rules §4 and the MIRA license."
+partition = "Not applicable (access decision)."
+metrics = "Not applicable."
+cannot_claim = "That de-identification permits redistribution; that a local demo or recording is automatically permitted."
+artifacts = "Dated permitted-use table in docs/data-audit.md."
+
+[[issue]]
+id = "KS-DATA-02"
+title = "Check alternative data sources: MRNet agreement status and organizer-provided data"
+epic = "KS-EPIC-DATA"
+type = "decision"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing (human decision)"
+depends_on = []
+problem = """If RSNA access, labels or terms are unsuitable, the fallback options are MRNet (requires an approved data-use agreement; supports overall abnormality, ACL tear and meniscal tear only) or data supplied by the hackathon organizers (supports only its documented labels)."""
+outcome = """docs/data-audit.md §1 has equivalent permitted-use rows for MRNet and for organizer data (or 'not offered'), with agreement status and turnaround."""
+scope = ["Record MRNet registration/agreement status and terms on training, hosting, demo and recording.", "Ask organizers whether they provide data and under what terms.", "Record label lists each source actually provides."]
+exclusions = ["Do not submit agreements or register accounts on anyone's behalf.", "Do not invent MCL or medial/lateral meniscus labels for MRNet."]
+guidance = """MRNet tasks map to finding IDs abnormal, acl_tear, meniscal_tear in contracts/findings.json. Organizer data needs its own profile only after KS-DATA-03 audits it."""
+files = ["docs/data-audit.md"]
+contract_impact = "May later add an organizer profile to contracts/findings.json (via KS-DATA-04)."
+acceptance = ["MRNet row: agreement status (not requested / requested on <date> / approved / declined) and the permitted-use table.", "Organizer data row: offered yes/no; if yes, label list and terms with source.", "Each source lists exactly the labels it provides, with a link or file reference."]
+verification = ["Reviewer cross-checks label lists against the source documentation."]
+docs = ["docs/data-audit.md"]
+dod = ["Rows complete or explicitly 'not offered'."]
+[issue.science]
+dataset = "MRNet (Stanford ML Group) under its research use agreement; organizer data under its stated terms."
+partition = "Not applicable."
+metrics = "Not applicable."
+cannot_claim = "MCL or separate medial/lateral meniscus results from MRNet."
+artifacts = "Permitted-use rows in docs/data-audit.md."
+
+[[issue]]
+id = "KS-DATA-03"
+title = "Audit the accessible dataset(s): studies, series, planes, labels and grouping identifiers"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing"
+depends_on = ["KS-DATA-01", "KS-DATA-02"]
+problem = """Choosing findings and splits requires facts: how many studies have labels, per-finding positive/negative/unknown counts, which planes exist, file formats and transfer syntaxes, and whether patient or site identifiers support grouped evaluation. For RSNA only a small labelled subset exists; the remaining studies have multilingual reports only."""
+outcome = """docs/data-audit.md §2–§6 completed for every dataset with verified access, produced by a committed script (scripts/audit_dataset.py) whose output JSON is saved under artifacts/audit/ (untracked) and summarised in the doc."""
+scope = ["Count studies, series per study, planes per study (Anatomical_Plane), slices per series, transfer syntaxes, corrupt/unreadable files.", "Per candidate finding: positive, negative, unknown/missing counts in the labelled subset.", "Whether PatientID or site can be derived for grouping; if not, state it.", "Disk size and download time for the subset to be used."]
+exclusions = ["No model training.", "No report text copied into the repository or issue."]
+guidance = """Read train.csv/train_series.csv (RSNA) with pandas or csv; open a sample of DICOMs with pydicom (+ pylibjpeg for JPEG Lossless/2000). Keep all outputs outside git (artifacts/ is ignored). Report counts only — no UIDs or report text in committed docs."""
+files = ["scripts/audit_dataset.py", "docs/data-audit.md"]
+contract_impact = "Provides evidence for the finding profile and preprocessing parameters; no contract change."
+acceptance = ["scripts/audit_dataset.py runs on the accessible data and writes artifacts/audit/<dataset>.json.", "docs/data-audit.md has a per-finding table with positive/negative/unknown counts and the denominator (labelled studies).", "Plane availability table: count of studies with each of sagittal/coronal/axial and with none.", "Grouping section states whether patient or site identifiers exist, with the field name or 'not available'.", "Corrupt/unreadable file count and transfer-syntax breakdown are reported."]
+verification = ["python scripts/audit_dataset.py --dataset <id> --root <path> --out artifacts/audit/<id>.json", "Second person reruns the script on the same subset and gets identical counts."]
+docs = ["docs/data-audit.md"]
+dod = ["Audit summary reviewed by the modelling and evaluation owners."]
+[issue.science]
+dataset = "Whichever dataset(s) KS-DATA-01/02 found accessible; record version/date of download."
+partition = "Whole labelled pool (no splits yet)."
+metrics = "Counts and prevalence only."
+cannot_claim = "Anything about model performance; that report-only studies are labelled."
+artifacts = "scripts/audit_dataset.py, artifacts/audit/<dataset>.json (untracked), summary tables in docs/data-audit.md."
+
+[[issue]]
+id = "KS-DATA-04"
+title = "Decide the dataset and supported finding profile"
+epic = "KS-EPIC-DATA"
+type = "decision"
+priority = "P0"
+workstream = "data"
+owner_role = "Coordinator/integrator with Data and Evaluation owners (human decision)"
+depends_on = ["KS-DATA-03"]
+problem = """The dataset determines the findings. RSNA may support ACL, MCL, medial and lateral meniscus if enough labelled studies exist; MRNet supports abnormal, ACL tear and meniscal tear; organizer data supports only its labels. Without usable data the product is an interaction prototype."""
+outcome = """A decision entry selects one dataset and one profile (or the interaction-prototype path) with the audit numbers that justify it; contracts/findings.json marks that profile 'selected' and sets default_profile; findings without enough positives and negatives to evaluate are dropped rather than shown."""
+scope = ["Choose dataset and profile using KS-DATA-03 counts and KS-DATA-01/02 permissions.", "Drop any finding whose evaluation partition would lack positives or negatives.", "Decide whether report-label extraction (KS-LABEL-02) is triggered.", "Decide whether KS-SCOPE-03 is triggered."]
+exclusions = ["Do not keep four result cards for appearance if labels cannot support them."]
+guidance = """State a minimum: e.g. at least N positive and N negative labelled studies per finding in the planned evaluation partition (choose N with the evaluation owner and record it). Adding an organizer profile requires a new profile in findings.json — follow the contract change procedure."""
+files = ["docs/decisions.md", "contracts/findings.json", "docs/data-audit.md"]
+contract_impact = "contracts/findings.json: profile status 'selected', default_profile updated; possibly a new profile. Regenerate contracts and notify consumers."
+acceptance = ["docs/decisions.md entry names dataset, version/date, profile, retained findings, dropped findings with reason, and the minimum-count rule.", "contracts/findings.json default_profile equals the selected profile and its status is 'selected' (or 'interaction_prototype' when KS-SCOPE-03 is triggered).", "KS-LABEL-02 and KS-SCOPE-03 are marked triggered/not triggered in docs/issue-index.md.", "python scripts/export_contracts.py --check passes after the change."]
+verification = ["python scripts/export_contracts.py --check", "pytest tests/test_contracts.py"]
+docs = ["docs/decisions.md", "docs/data-audit.md", "docs/issue-index.md", "contracts/README.md (§1 profile list)"]
+dod = ["Consumers (web, api, ml owners) acknowledged the profile change in the PR."]
+[issue.science]
+dataset = "Selected dataset with version/date and permitted-use reference."
+partition = "Planned evaluation partition sizes per finding (from audit)."
+metrics = "Counts only."
+cannot_claim = "That dropped findings are detectable; that one dataset's findings transfer to another."
+artifacts = "Decision entry with audit table excerpt."
+
+[[issue]]
+id = "KS-DATA-05"
+title = "Dataset adapter: study listing, plane assignment, series selection and slice ordering"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing"
+depends_on = ["KS-DATA-04"]
+problem = """Model input and the viewer need a deterministic mapping from the selected dataset to SeriesVolume objects: which series belong to which plane, which one series per plane feeds the model, and slice order by spatial position rather than filename."""
+outcome = """ml/kneescope_ml/adapters/<dataset>.py implements DatasetAdapter (list_studies, list_series, load_series, select_series) with slice_order 'patient_position' derived from ImagePositionPatient projected on the slice normal, and a documented series-selection rule."""
+scope = ["Implement the adapter for the selected dataset.", "Plane from dataset metadata (RSNA Anatomical_Plane) cross-checked with ImageOrientationPatient; disagreement → warning and plane=None.", "Series selection rule per plane (e.g. prefer fluid-sensitive, fat-suppressed; tie-break by slice count) documented in docstring and data-audit.md.", "Rescale slope/intercept applied; no flipping."]
+exclusions = ["Corrupt-file and transfer-syntax robustness (KS-DATA-06).", "Normalisation and resizing (preprocess module)."]
+guidance = """Never sort by filename or SOPInstanceUID. Use InstanceNumber only as a fallback with slice_order='instance_number' and a warning. Keep the adapter free of label access."""
+files = ["ml/kneescope_ml/adapters/", "tests/ml/test_adapter_<dataset>.py", "docs/data-audit.md"]
+contract_impact = "Produces SeriesVolume per contracts/README.md §2–§3. No schema change."
+acceptance = ["Unit tests on synthetic DICOMs (generated in the test with pydicom) prove ordering by position when filenames and InstanceNumber are shuffled.", "Test proves a plane mismatch yields plane=None and a warning.", "select_series returns at most one series per plane and follows the documented rule on a fixture with two sagittal series.", "Adapter module has no import of kneescope_ml.labels (enforced by tests/test_label_isolation.py)."]
+verification = ["pytest tests/ml -k adapter", "pytest tests/test_label_isolation.py"]
+docs = ["docs/data-audit.md (series selection rule)", "docs/architecture.md (adapter section, if changed)"]
+dod = ["Visual spot check of 5 studies' ordered slices recorded in the PR (screenshots kept local if data terms forbid sharing)."]
+[issue.science]
+dataset = "Selected dataset (KS-DATA-04)."
+partition = "Not applicable."
+metrics = "Not applicable."
+cannot_claim = "That planes are spatially registered to each other."
+artifacts = "Adapter tests with synthetic DICOM generation."
+
+[[issue]]
+id = "KS-DATA-06"
+title = "Handle orientation metadata, transfer syntaxes, missing series and corrupt inputs"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing"
+depends_on = ["KS-DATA-05"]
+problem = """RSNA series mix Explicit/Implicit VR, JPEG Lossless and JPEG 2000, with varying orientation and resolution; some files may be unreadable. Failures must surface as structured errors, not crashes or silently wrong images."""
+outcome = """The adapter decodes every transfer syntax found in the audit, records laterality and orientation without mirroring, maps failures to PREPROCESSING_FAILED / INPUT_INVALID with safe messages, and a missing required plane yields 'unavailable' findings."""
+scope = ["Add decoders (pylibjpeg/openjpeg or gdcm) to the ml extra and lock.", "Detect corrupt or inconsistent series (missing slices, mixed dimensions) and raise PreprocessingError with a reviewer-safe message.", "Record laterality and orientation metadata in SeriesVolume for display labels.", "Tests for each failure path."]
+exclusions = ["No image mirroring to a canonical side."]
+guidance = """Messages must not include file paths or UIDs. Mixed rows/cols within a series is an error unless a documented resample rule is chosen."""
+files = ["ml/kneescope_ml/adapters/", "ml/kneescope_ml/preprocess.py", "pyproject.toml", "uv.lock", "tests/ml/"]
+contract_impact = "May add optional orientation fields to SeriesSummary (additive, minor schema bump) — follow the contract change procedure if so."
+acceptance = ["A test per transfer syntax present in the audit decodes a generated or permitted sample.", "Tests: truncated file, mixed slice dimensions, zero slices → PreprocessingError with a message containing no path.", "A study missing the required plane produces findings with status 'unavailable' and reason code INPUT_INVALID through the API test client.", "No code path flips pixel arrays (grep check in test)."]
+verification = ["uv sync --extra ml && pytest tests/ml", "pytest tests/api -k unavailable"]
+docs = ["contracts/README.md §4 if orientation fields are added", "docs/data-audit.md"]
+dod = ["Audit's corrupt-file count reconciled with adapter failures."]
+
+[[issue]]
+id = "KS-DATA-07"
+title = "Freeze shared preprocessing v1 with visual inspection evidence"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing"
+depends_on = ["KS-DATA-05", "KS-DATA-06"]
+problem = """config/preprocessing.toml is a placeholder (prep-0.0.0-placeholder). Training and serving must use identical, versioned parameters chosen from the audit, and the output must be visually checked before training."""
+outcome = """config/preprocessing.toml version 'prep-1.0.0' with status 'frozen'; parameters justified in docs/decisions.md; scripts/inspect_preprocessing.py writes a contact sheet of preprocessed planes for a sample of studies (kept local if terms forbid sharing); the same function is imported by training, evaluation, caching and the API."""
+scope = ["Choose num_slices, H, W, normalisation from audit statistics.", "Implement scripts/inspect_preprocessing.py.", "Add a test that training data loader and API call the same preprocess_study (import identity).", "Bump version; document cache invalidation."]
+exclusions = ["Data augmentation (belongs to training, applied after preprocessing)."]
+guidance = """Any later change bumps the version and invalidates tensor and prediction caches (keys include the version). Keep resizing aspect-preserving."""
+files = ["config/preprocessing.toml", "ml/kneescope_ml/preprocess.py", "scripts/inspect_preprocessing.py", "tests/ml/test_preprocess.py"]
+contract_impact = "contracts/README.md §4 values updated; preprocessing version changes in all responses. Notify modelling, evaluation and backend owners."
+acceptance = ["config/preprocessing.toml has version 'prep-1.0.0' and status 'frozen'.", "tests/ml/test_preprocess.py covers: output dtype float32, shape (S,H,W) per plane, mask/padding, missing plane, constant series, no slice repeats, source_slice_index mapping.", "A test asserts the training loader and API prediction path reference kneescope_ml.preprocess.preprocess_study (no second implementation).", "Contact sheets for ≥10 studies across all planes inspected; findings recorded in the PR."]
+verification = ["pytest tests/ml/test_preprocess.py", "python scripts/inspect_preprocessing.py --n 10 --out artifacts/inspect/"]
+docs = ["contracts/README.md §4", "docs/decisions.md", "docs/architecture.md"]
+dod = ["Consumers acknowledged the frozen version in the PR."]
+[issue.science]
+dataset = "Selected dataset, labelled subset sample."
+partition = "Training partition only for any statistic used to set parameters."
+metrics = "Not applicable."
+cannot_claim = "That brightness on rendered PNGs is MRI window/level."
+artifacts = "Frozen config with SHA-256, inspection script, local contact sheets."
+
+[[issue]]
+id = "KS-DATA-08"
+title = "Create patient/study-grouped train, validation and test splits with leakage checks"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing with Evaluation reviewer"
+depends_on = ["KS-DATA-03", "KS-DATA-04", "KS-LABEL-01"]
+problem = """Slices from one study, or studies from one patient, must never cross partitions. Validation (used for choices and thresholds) and an untouched test partition must be separate where sample size permits."""
+outcome = """A committed split definition (artifacts are IDs only if permitted; otherwise a deterministic split script + seed + hash) assigning each study to train/validation/test, grouped by patient where identifiers exist, stratified by the selected findings where feasible; tests prove no group crosses partitions."""
+scope = ["scripts/make_splits.py with seed, grouping key and stratification.", "Leakage test: no study_id or patient group in more than one partition.", "Per-partition per-finding positive/negative/unknown counts written to docs/data-audit.md.", "If the labelled pool is too small for a test partition, record 'validation only' and the consequence for wording."]
+exclusions = ["No tuning on the test partition, ever."]
+guidance = """If patient IDs are unavailable, group by study and state this limitation in the model card. Unknown labels stay unknown in every partition."""
+files = ["scripts/make_splits.py", "tests/ml/test_splits.py", "docs/data-audit.md"]
+contract_impact = "Defines the 'partition' values used in MetricsSnapshot. No schema change."
+acceptance = ["scripts/make_splits.py is deterministic: two runs with the same seed produce identical split hashes.", "tests/ml/test_splits.py fails if any study or patient group appears in two partitions (tested with a deliberately leaky input).", "Per-partition counts table present; every retained finding has ≥1 positive and ≥1 negative in validation (else recorded as undefined).", "Test partition existence decision recorded."]
+verification = ["python scripts/make_splits.py --seed 2026 && python scripts/make_splits.py --seed 2026 --check-hash", "pytest tests/ml/test_splits.py"]
+docs = ["docs/data-audit.md §5", "docs/decisions.md"]
+dod = ["Evaluation owner signed off on partition sizes."]
+[issue.science]
+dataset = "Selected dataset labelled pool."
+partition = "Defines train / validation / (test if feasible)."
+metrics = "Counts and prevalence per partition."
+cannot_claim = "Patient-level independence if only study IDs exist; cross-site generalisation."
+artifacts = "Split script, seed, split hash, counts table."
+
+[[issue]]
+id = "KS-DATA-09"
+title = "Preprocessed tensor cache and training/evaluation data loaders"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P0"
+workstream = "data"
+owner_role = "Data/preprocessing"
+depends_on = ["KS-DATA-07", "KS-DATA-08"]
+problem = """Decoding DICOM every epoch is too slow for the available compute. Training and evaluation need cached tensors keyed by preprocessing version, plus loaders that yield masks and masked labels."""
+outcome = """scripts/cache_tensors.py writes per-study .npz under artifacts/cache/<prep_version>/ (untracked); kneescope_ml.data provides a Dataset yielding PreprocessedStudy tensors, plane masks, and label vectors with a separate known-label mask."""
+scope = ["Cache writer with resume and integrity check (shape, dtype, version).", "PyTorch Dataset/DataLoader for a split.", "Label vector + mask from KS-LABEL-01 output (unknown → mask 0).", "Throughput measurement recorded."]
+exclusions = ["Augmentation policy beyond simple, documented options."]
+guidance = """Cache key = study_id + preprocessing version + config SHA. A stale cache must be detected, not silently used."""
+files = ["scripts/cache_tensors.py", "ml/kneescope_ml/data.py", "tests/ml/test_data.py"]
+contract_impact = "None (internal), but must honour contracts/README.md §4."
+acceptance = ["Loading a cache entry written with a different preprocessing version raises an error (test).", "Dataset yields tensors of contract shape and a label mask where unknown labels are 0 (test with fixture labels).", "Cache build for the training subset completes and reports studies/second in the PR."]
+verification = ["pytest tests/ml/test_data.py", "python scripts/cache_tensors.py --split train --limit 20"]
+docs = ["docs/architecture.md (data flow)"]
+dod = ["Cache location and size documented in README 'Data' section."]
+
+[[issue]]
+id = "KS-DATA-10"
+title = "Select permitted demo studies and build the study manifest"
+epic = "KS-EPIC-DATA"
+type = "task"
+priority = "P1"
+workstream = "data"
+owner_role = "Data/preprocessing with Evaluation"
+depends_on = ["KS-DATA-07", "KS-DATA-08"]
+problem = """The app shows a small set of bundled studies (PRD: 3–5). They must be permitted for demonstration, come from the evaluation partition (not training), and cover a correct case, an error/missing-series case and a limitation case."""
+outcome = """scripts/build_manifest.py writes artifacts/manifest/studies.json (untracked if data terms require) listing 3–5 studies with series metadata in StudyDetail shape; selection rationale recorded without patient information."""
+scope = ["Pick studies from validation/test partition only.", "Include at least one study with a missing plane.", "Manifest validates against StudyDetail.", "Record permission basis for showing them."]
+exclusions = ["No studies from the training partition.", "No public hosting of the manifest images unless permitted (KS-OPS-05)."]
+guidance = """Final choice of demo cases depends on evaluation results (KS-DEMO-01); this issue provides the candidate pool and the manifest tooling."""
+files = ["scripts/build_manifest.py", "docs/data-audit.md", "tests/ml/test_manifest.py"]
+contract_impact = "Produces StudyDetail records; no schema change."
+acceptance = ["Manifest validates against StudyDetail (test).", "Every manifest study is in validation or test partition (test against split file).", "At least one manifest study has a missing plane.", "Permission basis cites the KS-DATA-01/02 table row."]
+verification = ["python scripts/build_manifest.py --out artifacts/manifest/studies.json", "pytest tests/ml/test_manifest.py"]
+docs = ["docs/data-audit.md §6 'Demo studies'"]
+dod = ["Evaluation owner confirms none are training studies."]
