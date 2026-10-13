@@ -1,0 +1,104 @@
+[[issue]]
+id = "KS-API-01"
+title = "Dataset-backed study catalogue and slice rendering in model mode"
+epic = "KS-EPIC-API"
+type = "task"
+priority = "P0"
+workstream = "backend"
+owner_role = "Backend/serving"
+depends_on = ["KS-DATA-05", "KS-DATA-06"]
+problem = """In model mode the API returns MODEL_NOT_LOADED for every route. /studies, /studies/{id} and the slice endpoint must serve the permitted manifest studies through the dataset adapter and the shared renderer, while fixture mode keeps working unchanged."""
+outcome = """A StudyCatalogue interface with FixtureCatalogue and DatasetCatalogue implementations; model mode serves manifest studies (origin 'dataset'); slices are rendered by kneescope_ml.render with an LRU cache; restricted paths never appear in responses or logs."""
+scope = ["Catalogue abstraction in api/kneescope_api/store.py.", "Manifest path from KNEESCOPE_MANIFEST env var.", "Slice endpoint uses adapter.load_series + render_slice_png; cache rendered PNGs in memory.", "Tests run with a generated synthetic DICOM manifest."]
+exclusions = ["Prediction (KS-API-02).", "Upload of arbitrary studies (optional KS-OPT-01)."]
+guidance = """Keep the response contracts identical across modes; only origin and dataset_id differ. Path-like IDs are rejected by the existing pattern; keep it."""
+files = ["api/kneescope_api/store.py", "api/kneescope_api/main.py", "api/kneescope_api/settings.py", "tests/api/test_catalogue.py", ".env.example"]
+contract_impact = "None (uses StudyList/StudyDetail)."
+acceptance = ["With KNEESCOPE_MODE=model and a synthetic manifest, GET /studies returns origin 'dataset' entries that validate as StudyList (test).", "Slice PNG dimensions equal rendered_width × rendered_height from the study detail (test).", "A slice index ≥ num_slices returns 404 SLICE_OUT_OF_RANGE (test).", "Fixture-mode tests still pass unchanged.", "No response or log line contains the data root path (test captures logs)."]
+verification = ["pytest tests/api", "KNEESCOPE_MODE=model KNEESCOPE_MANIFEST=... uvicorn kneescope_api.main:app"]
+docs = ["docs/architecture.md (catalogue)", "README.md (run modes)", ".env.example"]
+dod = ["Frontend owner verified the Review page against model mode with synthetic data."]
+
+[[issue]]
+id = "KS-API-02"
+title = "Live inference through shared preprocessing in POST /predictions"
+epic = "KS-EPIC-API"
+type = "task"
+priority = "P0"
+workstream = "backend"
+owner_role = "Backend/serving"
+depends_on = ["KS-API-01", "KS-MODEL-05", "KS-DATA-07"]
+problem = """POST /predictions must run select_series → preprocess_study → Predictor.predict for the requested study, map outputs to the five finding states, and report provenance 'live' with measured latency — without ever reading labels."""
+outcome = """Model-mode prediction path implemented; finding states mapped per contracts §6 (unsupported, unavailable for missing required plane, failed per finding, study-level 422 for preprocessing failures); latency measured; label isolation test extended to the API path."""
+scope = ["Prediction service in api/kneescope_api/service.py for model mode.", "Predictor loaded once at startup; /healthz reports model_loaded and model_version.", "Errors mapped to ErrorCode with safe messages.", "Request timeout handling (INFERENCE_TIMEOUT, retryable)."]
+exclusions = ["Caching (KS-API-04).", "Job-and-poll (KS-OPS-04, conditional)."]
+guidance = """Use the tiny generated checkpoint from KS-MODEL-05 tests for CI. Do not import kneescope_ml.labels anywhere on this path."""
+files = ["api/kneescope_api/service.py", "api/kneescope_api/main.py", "tests/api/test_predict_live.py", "tests/test_label_isolation.py"]
+contract_impact = "None expected; PredictionResponse with source 'live'."
+acceptance = ["With the tiny checkpoint, POST /predictions returns source 'live', latency_ms > 0, checkpoint_sha256 matching config, and preprocessing.version equal to config (test).", "A study missing the required plane returns all findings 'unavailable' with INPUT_INVALID (test).", "A corrupt series returns HTTP 422 PREPROCESSING_FAILED with no scores (test).", "tests/test_label_isolation.py covers the model-mode prediction path and passes.", "/healthz reports model_loaded true and the model_version."]
+verification = ["pytest tests/api tests/test_label_isolation.py"]
+docs = ["docs/architecture.md (request flow)", "contracts/README.md §6 if clarified"]
+dod = ["Frontend shows a live result with the LIVE badge against this endpoint."]
+
+[[issue]]
+id = "KS-API-03"
+title = "Serve real explanations with alignment validation"
+epic = "KS-EPIC-API"
+type = "task"
+priority = "P1"
+workstream = "backend"
+owner_role = "Backend/serving with Labels reviewer"
+depends_on = ["KS-API-02", "KS-LABEL-03"]
+problem = """GET /studies/{id}/explanations/{finding} must return explanations produced for the same prediction and checkpoint, or 'unavailable' — never a stale or mismatched overlay."""
+outcome = """Explanations computed with (or stored alongside) the prediction, keyed by prediction_id; the endpoint validates study, finding, prediction_id and model_version and returns 'unavailable' with a reason on any mismatch."""
+scope = ["Store explanation outputs per prediction_id (in-memory or alongside cache).", "Validation of identifiers and rendered size.", "Tests for mismatch paths."]
+exclusions = ["Generating overlays client-side."]
+guidance = """An unknown prediction_id returns status 'unavailable' (reason EXPLANATION_UNAVAILABLE), not a 500."""
+files = ["api/kneescope_api/service.py", "tests/api/test_explanations.py"]
+contract_impact = "None (Explanation)."
+acceptance = ["Explanation for a live prediction validates and its slice indices are within the series range (test).", "Mismatched prediction_id returns status 'unavailable' with reason (test).", "explanation_available in FindingResult is true only when an explanation exists (test)."]
+verification = ["pytest tests/api/test_explanations.py"]
+docs = ["contracts/README.md §7 if clarified"]
+dod = ["UI influential-slice jump verified against it."]
+
+[[issue]]
+id = "KS-API-04"
+title = "Prediction cache with provenance-preserving cached results"
+epic = "KS-EPIC-API"
+type = "task"
+priority = "P1"
+workstream = "backend"
+owner_role = "Backend/serving"
+depends_on = ["KS-API-02"]
+problem = """A cached mode is the operational fallback for the demo, but cached outputs must never masquerade as live inference, and stale entries (different model or preprocessing) must never be served."""
+outcome = """File-based cache under serving.cache_dir keyed by study_id, model_version, checkpoint_sha256, preprocessing version and profile; served with source 'cached', original computed_at, cache_key, no latency; allow_cached=false forces live."""
+scope = ["Cache write after live runs (opt-in flag) and read on request.", "Key mismatch = miss.", "Study list analysis_status 'cached' when an entry exists.", "Tests."]
+exclusions = ["Redis or any external store."]
+guidance = """Cache files may contain study IDs; keep cache_dir untracked and out of public hosting unless permitted."""
+files = ["api/kneescope_api/cache.py", "api/kneescope_api/service.py", "tests/api/test_cache.py"]
+contract_impact = "None (ResultProvenance cached rules already enforced)."
+acceptance = ["Served cached result has source 'cached', computed_at from the original run, cache_key set, latency_ms null (test).", "Changing model_version or preprocessing version yields a miss and a live run (test).", "allow_cached=false always returns 'live' (test).", "A tampered cache entry that fails contract validation is ignored and logged without content (test)."]
+verification = ["pytest tests/api/test_cache.py"]
+docs = ["README.md 'Cached mode'", "docs/architecture.md"]
+dod = ["Frontend shows CACHED badge with timestamp for a cached result."]
+
+[[issue]]
+id = "KS-API-05"
+title = "Serve real labels, metrics snapshot and model card"
+epic = "KS-EPIC-API"
+type = "task"
+priority = "P1"
+workstream = "backend"
+owner_role = "Backend/serving"
+depends_on = ["KS-API-01", "KS-LABEL-01", "KS-EVAL-03", "KS-EVAL-06"]
+problem = """In model mode /studies/{id}/labels, /metrics and /model-card must serve the real artifacts, keeping labels out of the prediction path."""
+outcome = """Label store reads the KS-LABEL-01 file; /metrics serves the KS-EVAL-03 snapshot for the loaded model_version (or 'unavailable' if missing); /model-card serves the published card."""
+scope = ["Artifact paths via settings.", "Version match: metrics/model card must match the loaded model_version, otherwise 'unavailable' with reason.", "Tests with generated artifacts."]
+exclusions = ["Editing metrics in the API."]
+guidance = """A snapshot for a different model_version is never served as current."""
+files = ["api/kneescope_api/store.py", "api/kneescope_api/main.py", "tests/api/test_artifacts.py"]
+contract_impact = "None."
+acceptance = ["Metrics snapshot whose model_version differs from the loaded model returns status 'unavailable' with a reason (test).", "Labels endpoint returns provenance per label (test).", "tests/test_label_isolation.py passes."]
+verification = ["pytest tests/api/test_artifacts.py tests/test_label_isolation.py"]
+docs = ["README.md"]
+dod = ["Evaluation page renders the real snapshot."]
