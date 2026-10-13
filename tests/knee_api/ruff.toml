@@ -1,0 +1,7 @@
+# Lint settings of the original main-branch scaffold, kept for its own code.
+line-length = 100
+src = ["../../src", ".."]
+target-version = "py310"
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
