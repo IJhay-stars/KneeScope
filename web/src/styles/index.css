@@ -461,6 +461,7 @@ table.studies a {
   min-width: 0;
   min-height: 0;
   background: var(--ks-lb-bg);
+  position: relative;
 }
 .stage-head {
   display: flex;
@@ -499,7 +500,7 @@ table.studies a {
   background: var(--ks-lb-raised);
   border-bottom-color: var(--ks-lb-accent);
 }
-.tabs button:disabled {
+.tabs button[aria-disabled='true'] {
   color: var(--ks-lb-text-faint);
   cursor: not-allowed;
   border-bottom: 2px dashed var(--ks-lb-line-strong);
@@ -528,12 +529,25 @@ table.studies a {
   background: var(--ks-hatch);
   z-index: 2;
 }
+.viewer {
+  touch-action: none;
+}
+.viewer.zoomed {
+  cursor: grab;
+}
+.viewer.dragging {
+  cursor: grabbing;
+}
 .viewer canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+/* Nearest-neighbour only above 200% (DESIGN.md section 14); no transition on the image. */
+.viewer canvas.pixelated {
+  image-rendering: pixelated;
 }
 .viewer .corner {
   position: absolute;
@@ -578,6 +592,85 @@ table.studies a {
   gap: var(--ks-space-2);
   padding: var(--ks-space-2) var(--ks-space-4) var(--ks-space-3);
   flex-wrap: wrap;
+}
+.controls-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 4px var(--ks-space-1);
+  background: var(--ks-lb-line);
+}
+.adjust {
+  position: relative;
+}
+.popover {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  z-index: 5;
+  width: 260px;
+  display: grid;
+  gap: var(--ks-space-2);
+  padding: var(--ks-space-3);
+  background: var(--ks-lb-raised);
+  border: 1px solid var(--ks-lb-line-strong);
+  border-radius: var(--ks-radius-panel);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  font-size: 12px;
+}
+.popover p {
+  margin: 0;
+}
+.popover label {
+  display: grid;
+  grid-template-columns: 70px 1fr 44px;
+  align-items: center;
+  gap: var(--ks-space-2);
+}
+.sheet {
+  position: absolute;
+  top: 56px;
+  right: var(--ks-space-4);
+  z-index: 6;
+  width: min(420px, calc(100% - 2 * var(--ks-space-4)));
+  padding: var(--ks-space-4);
+  background: var(--ks-lb-raised);
+  border: 1px solid var(--ks-lb-line-strong);
+  border-radius: var(--ks-radius-panel);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  font-size: 13px;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sheet h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.sheet table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--ks-space-3) 0;
+}
+.sheet th,
+.sheet td {
+  padding: 4px 0;
+  text-align: left;
+  font-weight: 400;
+  vertical-align: top;
+}
+.sheet th {
+  white-space: nowrap;
+  padding-right: var(--ks-space-3);
+}
+.sheet th kbd + kbd {
+  margin-left: 4px;
+}
+.sheet p {
+  margin: 0;
+  font-size: 12px;
 }
 input[type='range'] {
   flex: 1;
@@ -721,6 +814,11 @@ input[type='range'] {
   flex-wrap: wrap;
   margin-left: -6px;
 }
+.label-notice {
+  margin: 0;
+  padding: var(--ks-space-3) var(--ks-space-4);
+  font-size: 12px;
+}
 .label-reveal {
   font-size: 12px;
   padding: 6px 8px;
@@ -832,6 +930,36 @@ table.metrics th {
   border-top: 1px solid var(--ks-lg-ink);
   border-bottom: 1px solid var(--ks-lg-line);
 }
+table.metrics tbody th {
+  font: 500 13px var(--ks-font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  border-top: 0;
+  border-bottom: 1px solid var(--ks-lg-line);
+  color: var(--ks-lg-ink);
+  height: 40px;
+}
+table.metrics .metric-value {
+  color: var(--ks-lg-ink);
+}
+table.metrics .metric-note {
+  display: block;
+  font: 400 11px/1.3 var(--ks-font-sans);
+  color: var(--ks-lg-ink-muted);
+}
+table.metrics td.undef .metric-note {
+  color: var(--ks-lg-ink-muted);
+}
+.ledger-table-wrap {
+  border-right: 1px solid var(--ks-lg-line);
+}
+.ledger-table-wrap:focus-visible {
+  outline: 2px solid var(--ks-lg-accent);
+  outline-offset: 2px;
+}
+.macro-auc {
+  margin-top: var(--ks-space-3);
+}
 table.metrics th:first-child,
 table.metrics td:first-child {
   text-align: left;
@@ -868,6 +996,78 @@ table.metrics td.undef {
   margin-bottom: 6px;
 }
 
+/* Study browser: tools, row links, card list (DESIGN.md sections 9.3, 15) */
+.page-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--ks-space-2);
+  flex-wrap: wrap;
+}
+table.studies tbody tr.row-link {
+  cursor: pointer;
+}
+table.studies .open-cell {
+  color: var(--ks-lb-accent);
+}
+table.studies a:focus-visible,
+.study-card-link:focus-visible {
+  outline: 2px solid var(--ks-lb-focus);
+  outline-offset: 2px;
+}
+.study-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.study-card {
+  padding: var(--ks-space-3) var(--ks-space-4);
+  border-bottom: 1px solid var(--ks-lb-line);
+}
+.study-card:last-child {
+  border-bottom: 0;
+}
+.study-card:hover {
+  background: var(--ks-lb-raised);
+}
+.study-card-link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px var(--ks-space-3);
+  min-height: 32px;
+  align-items: center;
+  color: var(--ks-lb-accent);
+  overflow-wrap: anywhere;
+}
+.study-card-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ks-space-2) var(--ks-space-4);
+  margin: var(--ks-space-2) 0 0;
+}
+.study-card-fields dt {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ks-lb-text-faint);
+}
+.study-card-fields dd {
+  margin: 0;
+}
+@media (max-width: 599px) {
+  .field {
+    min-width: 0;
+    width: 100%;
+  }
+  .page-tools {
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+  .page-tools label {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
 /* Narrow widths: keep the app usable without horizontal page scroll (DESIGN.md section 15). */
 @media (max-width: 1199px) {
   .workspace {
@@ -892,8 +1092,15 @@ table.metrics td.undef {
   }
   .topbar {
     flex-wrap: wrap;
-    padding: 8px 16px;
-    gap: 8px 16px;
+    padding: 8px 16px 0;
+    gap: 4px 16px;
+  }
+  /* A wrapped top bar has no fixed height, so the nav needs its own (DESIGN.md §15). */
+  .nav {
+    height: 40px;
+    order: 3;
+    flex-basis: 100%;
+    margin-left: calc(-1 * var(--ks-space-3));
   }
   .footer {
     flex-wrap: wrap;
@@ -907,6 +1114,14 @@ table.metrics td.undef {
   }
   .browser {
     padding: var(--ks-space-4);
+  }
+}
+
+/* Below 600px the shortcut sheet is hidden (DESIGN.md section 15). */
+@media (max-width: 599px) {
+  .sheet,
+  .shortcuts-btn {
+    display: none;
   }
 }
 
@@ -928,4 +1143,100 @@ table.metrics td.undef {
 }
 .ledger .btn:hover:not(:disabled) {
   background: var(--ks-lg-paper-2);
+}
+
+/* ---- Finding selection (DESIGN.md section 9.8) ---- */
+button.finding-main {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.finding.selected {
+  background: var(--ks-lb-raised);
+  border-left-color: var(--ks-lb-accent);
+}
+
+/* ---- Explanation panel and overlay (DESIGN.md sections 9.9 and 14) ---- */
+.viewer canvas.attention-overlay {
+  pointer-events: none;
+}
+.explain {
+  padding: var(--ks-space-4);
+  display: grid;
+  gap: var(--ks-space-3);
+  border-top: 1px solid var(--ks-lb-line);
+}
+.explain h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.slice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.slice-chips .btn {
+  height: 28px;
+  min-width: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.overlay-controls {
+  display: grid;
+  gap: var(--ks-space-2);
+}
+.overlay-controls .toggle,
+.overlay-controls .opacity {
+  display: flex;
+  align-items: center;
+  gap: var(--ks-space-2);
+  font-size: 13px;
+}
+.overlay-controls input[type='checkbox'] {
+  accent-color: var(--ks-lb-accent);
+  width: 16px;
+  height: 16px;
+}
+.overlay-controls input[type='range'] {
+  accent-color: var(--ks-lb-accent);
+  flex: 1;
+}
+.legend {
+  display: flex;
+  align-items: center;
+  gap: var(--ks-space-2);
+  font-size: 12px;
+  color: var(--ks-lb-text-muted);
+}
+.legend .ramp {
+  display: inline-flex;
+  height: 8px;
+}
+.legend .ramp i {
+  display: block;
+  width: 14px;
+}
+/* Single-hue ochre -> rust ramp, as solid steps (no gradient). */
+.legend .ramp .r1 {
+  background: #c9944a;
+  opacity: 0.6;
+}
+.legend .ramp .r2 {
+  background: #cd7846;
+  opacity: 0.8;
+}
+.legend .ramp .r3 {
+  background: #b2542c;
+}
+.explain .note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ks-lb-text-muted);
+  border-left: 2px solid var(--ks-lb-line-strong);
+  padding-left: 10px;
 }

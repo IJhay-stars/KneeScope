@@ -126,9 +126,17 @@ workstreams' unfinished work.
 
 ## 7. Branches, worktrees and avoiding overlapping edits
 
-- Branch per issue: `ks/<issue-id>-<short-slug>` (e.g. `ks/KS-WEB-03-finding-states`).
-  No direct pushes to `main`.
-- Agents with worktree support should use an isolated worktree per issue.
+- **One working branch per contributor:** `<github-user>/work` (e.g. `anasabubakar/work`),
+  branched from `main`, used for every issue that person works on. No direct pushes to
+  `main`; no per-issue branches.
+- **One open PR per contributor, straight into `main`.** Keep working on the same branch;
+  the open PR updates as you push. After it merges, merge `main` back into your branch and
+  open the next PR from the same branch.
+- **Stay current:** merge `main` into your branch before starting work each session and
+  before asking for review (merge, never rebase or force-push a shared branch).
+- Commit per logical edit, with the issue ID in the message
+  (`feat(data): … (KS-DATA-05)`), so one branch still shows which issue each change serves.
+- Agents with worktree support may use a worktree, but on the same working branch.
 - Touch only the files your issue lists, plus tests and docs. If you must edit outside
   your workstream's paths, say so in the PR and request that owner's review.
 - Generated files (`contracts/schema/`, `contracts/openapi.json`, `contracts/examples/`,
@@ -167,6 +175,7 @@ Run what applies before opening a PR, and paste results in the PR:
 | Python tests | `uv run pytest` |
 | Contracts in sync | `uv run python scripts/export_contracts.py --check` and `pnpm --dir web gen:api:check` |
 | Web | `pnpm --dir web lint && pnpm --dir web typecheck && pnpm --dir web test && pnpm --dir web build` |
+| Restricted assets | `python3 scripts/check_restricted_assets.py` |
 | Design tokens | `python3 scripts/check_design_tokens.py` |
 | Backlog graph | `python3 scripts/backlog.py check` |
 | Canonical layout | `python3 scripts/check_layout.py` |
@@ -180,8 +189,9 @@ ID, seed, split hash, preprocessing version and checkpoint SHA-256.
 - Title: `KS-XXX-NN: <imperative summary>`. Body: what changed, why, evidence for each
   acceptance criterion, commands run with results, screenshots, contract impact, docs
   updated, follow-ups filed.
-- Keep PRs reviewable (prefer < ~400 changed lines excluding generated files). Split
-  otherwise. One issue per PR unless issues are explicitly bundled.
+- A PR may bundle many issues from the contributor's working branch. Its body lists every
+  issue with a "Refs #N" or "Closes #N" line and the evidence per acceptance criterion.
+  Ask for review early and often (draft PR) rather than letting one PR grow unreviewed.
 - Reviewer from a different workstream (see §3).
 - Handoff note when you stop or finish: state of the branch, what is verified, what is
   not, open questions, and the next concrete step. Put it on the issue.
@@ -234,7 +244,8 @@ issue saying "deploy" or "email the organizers" is not permission to do it).
 - Never commit: DICOM/NIfTI/image data from datasets, radiology report text, label files
   whose terms forbid sharing, checkpoints (`*.pt`, `*.ckpt`, `*.safetensors`), cached
   tensors, prediction caches with dataset IDs. They live under `data/` or `artifacts/`
-  (git-ignored). `KS-OPS-01` adds an automated guard.
+  (git-ignored). `scripts/check_restricted_assets.py` blocks them in CI; see
+  [`docs/security.md`](docs/security.md).
 - Do not upload dataset content (images, reports, labels) to any external service —
   including AI APIs, paste sites, cloud notebooks or issue trackers — without verified
   authorization recorded in `docs/data-audit.md`.

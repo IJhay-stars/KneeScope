@@ -25,12 +25,24 @@ jobs:
         run: uv run pytest
       - name: Contract artifacts in sync
         run: uv run python scripts/export_contracts.py --check
-      - name: Design tokens, backlog graph, docs
+      - name: Restricted assets, design tokens, backlog graph, docs
         run: |
+          python3 scripts/check_restricted_assets.py
           python3 scripts/check_layout.py
           python3 scripts/check_design_tokens.py
           python3 scripts/backlog.py check
           python3 scripts/check_docs.py
+
+  ml:
+    # CPU torch only (see pyproject [tool.uv.sources]); runs the training smoke tests.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen --extra ml
+      - run: uv run pytest tests/ml
 
   web:
     runs-on: ubuntu-latest
