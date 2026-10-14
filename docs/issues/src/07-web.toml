@@ -1,0 +1,176 @@
+[[issue]]
+id = "KS-WEB-01"
+title = "Study browser: filter, sort, responsive list and all states"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P0"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = []
+problem = """The scaffold renders a basic study table. The study browser must match DESIGN.md §9.3 and §15 including filtering, keyboard navigation, the <600px card list, and loading/empty/error states."""
+outcome = """Studies page complete per DESIGN.md §9.3, §10, §15, §16, working against fixture mode and (later) model mode without changes."""
+scope = ["Filter by study ID, sort by ID.", "Rows are links (keyboard Enter), with accessible names including plane availability and analysis status.", "Card list below 600px.", "Loading (flat skeleton, aria-busy), empty (no permitted studies), error (code, request_id, retry)."]
+exclusions = ["Any metadata beyond DESIGN.md §9.3 (no names, dates, accession numbers)."]
+guidance = """Reference: docs/design/design-concept.html 'Studies'. Use API types from web/src/api/schema.d.ts only."""
+files = ["web/src/pages/StudiesPage.tsx", "web/src/components/", "web/src/**/*.test.tsx"]
+contract_impact = "None (StudyList)."
+design_refs = ["DESIGN.md §9.3 Study table", "DESIGN.md §10 states", "DESIGN.md §15 responsive", "DESIGN.md §16 accessibility"]
+acceptance = ["Component tests: loading, empty (studies: []), error (ApiError body with retryable true shows Retry), and populated states each render the specified text.", "Missing plane slot has accessible text '<plane> missing' (test).", "At 375px width there is no horizontal page scroll (manual screenshot in PR).", "Keyboard: Tab to a row and Enter opens /studies/:id (test)."]
+verification = ["pnpm --dir web test", "pnpm --dir web build"]
+docs = ["DESIGN.md (only if a spec change is needed)"]
+dod = ["Before/after screenshots at 1440px and 375px in the PR."]
+
+[[issue]]
+id = "KS-WEB-02"
+title = "Slice viewer: canvas rendering, navigation, zoom/pan, display adjust and missing series"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P0"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = []
+problem = """The review workspace's viewer must make the image the focus: neutral well, precise slice navigation, zoom/pan/fit, a display-adjust control clearly not called window/level, keyboard shortcuts, and explicit missing-series states."""
+outcome = """Viewer per DESIGN.md §9.4–9.5, §12, §14: plane tabs (missing plane disabled and skipped), series select, canvas drawing PNGs at rendered size with nearest-neighbour above 200%, slider with aria-valuetext, prefetch of adjacent slices, corner annotations, shortcut sheet."""
+scope = ["Plane tabs with roving tabindex.", "Slice slider, first/prev/next/last, PageUp/PageDown ±10, Home/End, 1/2/3, +/−/0.", "Zoom, pan (drag), fit; display adjust labelled 'Display adjust (not window/level)'.", "Prefetch ±2 slices; show load errors in the well with code.", "Plane switch resets to the middle slice; no cross-plane linking."]
+exclusions = ["True window/level (optional KS-OPT-05).", "Crosshairs or linked scrolling between planes."]
+guidance = """Slice indices are 0-based in the API; display 1-based. Do not animate between slices."""
+files = ["web/src/components/viewer/", "web/src/pages/ReviewPage.tsx", "web/src/hooks/useKeyboardShortcuts.ts"]
+contract_impact = "None (SeriesSummary, slice endpoint)."
+design_refs = ["DESIGN.md §9.4 Plane tabs", "DESIGN.md §9.5 Viewer", "DESIGN.md §12 Keyboard", "DESIGN.md §13 Motion", "DESIGN.md §14 Image presentation"]
+acceptance = ["Tests: pressing j on slice 1 of 30 shows '2 / 30' and requests slice_index 1; End shows '30 / 30'.", "Missing plane tab has aria-disabled and is skipped by arrow keys and the number shortcut (test).", "Shortcuts do not fire while focus is in an input/select (test).", "Display adjust control's accessible name contains 'not window/level' (test).", "Canvas aria-label includes study, series, plane and slice (test)."]
+verification = ["pnpm --dir web test", "pnpm --dir web build"]
+docs = ["DESIGN.md §12 if bindings change"]
+dod = ["Manual keyboard-only walkthrough recorded in PR."]
+
+[[issue]]
+id = "KS-WEB-03"
+title = "Findings panel: run analysis, five finding states and result provenance"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P0"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = []
+problem = """Reviewers must be able to tell scored, not evaluated, unavailable, unsupported and failed apart, and live, cached and fixture results apart, without relying on colour."""
+outcome = """Findings column per DESIGN.md §9.6–9.8 and §11: run-analysis button with step/elapsed status and aria-live announcements; finding rows driven by the active profile; provenance strip with LIVE/CACHED/FIXTURE treatments; study-level errors as 'Analysis failed' with code and request_id."""
+scope = ["Run analysis with disabled state while running and 'Run again' after.", "All five states with glyph + text; score bar never coloured by value.", "Threshold text only when threshold exists.", "Provenance strip fields: source badge, model version, checkpoint short SHA, preprocessing version, computed/served time, latency for live only.", "Fixture hatch stripe on rows and viewer frame."]
+exclusions = ["Explanation panel (KS-WEB-05).", "Label reveal (KS-WEB-04)."]
+guidance = """Drive tests from contracts/examples/*.json. For cached and live states, construct test-only responses inside tests (validated shapes), never ship them as fixtures."""
+files = ["web/src/components/findings/", "web/src/pages/ReviewPage.tsx"]
+contract_impact = "None (PredictionResponse)."
+design_refs = ["DESIGN.md §9.6 Run analysis", "DESIGN.md §9.7 Provenance strip", "DESIGN.md §9.8 Finding row", "DESIGN.md §11 Result and finding states"]
+acceptance = ["Test: a score of 0.07 renders as scored ('0.07'), with no 'failed' or 'unavailable' text.", "Test: each status renders its distinct text ('Not evaluated', 'Unavailable — …', 'Not supported by this model', 'Analysis failed — <code>').", "Test: fixture response shows 'FIXTURE — not a model output'; cached shows 'CACHED' with the original timestamp and no latency; live shows 'LIVE' with latency.", "Test: HTTP 422 PREPROCESSING_FAILED shows 'Analysis failed' and no scores.", "aria-live region announces start and completion (test)."]
+verification = ["pnpm --dir web test"]
+docs = ["DESIGN.md §11 if states change"]
+dod = ["Screenshots of all five states in the PR."]
+
+[[issue]]
+id = "KS-WEB-04"
+title = "Reveal dataset label per finding, separate from inference"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P0"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = []
+problem = """Comparing a score with the dataset label is part of the workflow, but labels must be hidden by default and fetched separately so they cannot influence or be confused with predictions."""
+outcome = """Per-finding 'Reveal dataset label' action per DESIGN.md §9.10 fetching /studies/{id}/labels on demand, showing state and provenance, reset on study change."""
+scope = ["Lazy fetch on first reveal.", "States positive/negative/unknown (not labelled)/not_labeled text.", "Provenance text including 'fixture' when applicable.", "Reset on study change."]
+exclusions = ["Any aggregation of labels vs scores in the review view (that is the evaluation page)."]
+guidance = """Never send labels to POST /predictions or store them with predictions in client state."""
+files = ["web/src/components/findings/LabelReveal.tsx"]
+contract_impact = "None (StudyLabels)."
+design_refs = ["DESIGN.md §9.10 Dataset label reveal"]
+acceptance = ["Test: no /labels request is made until the first reveal click.", "Test: switching study hides revealed labels.", "Test: 'unknown' renders 'Unknown (not labelled)', never 'Negative'.", "Test: the predictions request body never contains label fields."]
+verification = ["pnpm --dir web test"]
+docs = []
+dod = ["Reviewed by the Labels owner."]
+
+[[issue]]
+id = "KS-WEB-05"
+title = "Explanation panel: influential-slice jump and aligned attention overlay"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P1"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = ["KS-WEB-02", "KS-WEB-03"]
+problem = """Reviewers need to jump to influential slices and, if available, see model attention — correctly aligned, correctly named, and absent when unavailable."""
+outcome = """Explanation panel per DESIGN.md §9.9 and §14: slice chips jump to the series and slice; attention overlay (single-hue ochre→rust ramp with opacity control) drawn only when series, slice, prediction_id and model_version match; 'Explanation unavailable — <reason>' otherwise."""
+scope = ["Fetch explanation for the selected finding after a prediction.", "Jump switches plane/series as needed.", "Overlay drawing with alignment guard and legend 'Model attention (relative, not lesion location)'.", "Unavailable and alignment-failure states."]
+exclusions = ["Rainbow/jet colour maps.", "Wording such as 'tear detected here'."]
+guidance = """Fixture explanations provide influential slices only. Test overlay drawing with a test-only AttentionMap built in the test."""
+files = ["web/src/components/explanations/"]
+contract_impact = "None (Explanation)."
+design_refs = ["DESIGN.md §9.9 Explanation panel", "DESIGN.md §14 Image and overlay presentation"]
+acceptance = ["Test: clicking an influential slice chip for slice_index 12 shows '13 / n' on the correct series.", "Test: an attention map with a different series_id is not drawn and the panel shows the alignment-failure text.", "Test: unavailable explanation shows 'Explanation unavailable' and the reason.", "No string in the component contains 'lesion location' except the negated legend (lint test or grep in CI)."]
+verification = ["pnpm --dir web test"]
+docs = ["DESIGN.md §9.9 if behaviour changes"]
+dod = ["Labels owner confirmed wording."]
+
+[[issue]]
+id = "KS-WEB-06"
+title = "Evaluation and model-card ledger view"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P0"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = []
+problem = """The evaluation page must show what was measured, on which partition, with counts — and show 'Metrics unavailable' or 'Undefined — one class only' explicitly rather than hiding or inventing numbers."""
+outcome = """Ledger view per DESIGN.md §9.11–9.12 rendering MetricsSnapshot (available and unavailable), FindingMetrics with all MetricValue statuses, macro AUC with exclusions, inference measurements, partition wording ('Validation' vs 'Held-out test'), and the model card."""
+scope = ["Header facts block: dataset, partition, split method, grouping unit, model and preprocessing versions, snapshot time.", "Metrics table with counts and per-status rendering.", "Model card sections and numbered limitations.", "Responsive ledger."]
+exclusions = ["Charts that imply precision beyond the counts (ROC curve plots are optional and only with counts shown)."]
+guidance = """Build tests from contracts/examples/metrics-unavailable.json plus a test-only 'available' snapshot constructed inside the test file (marked as test data)."""
+files = ["web/src/pages/EvaluationPage.tsx", "web/src/components/ledger/"]
+contract_impact = "None (MetricsSnapshot, ModelCard)."
+design_refs = ["DESIGN.md §9.11 Metrics table", "DESIGN.md §9.12 Model card", "DESIGN.md §4.2 Ledger tokens"]
+acceptance = ["Test: unavailable snapshot renders 'Metrics unavailable' and no numeric cells.", "Test: undefined_single_class renders 'Undefined — one class only (n+ = 0)'.", "Test: partition 'validation' renders 'Validation', never 'Test'.", "Test: macro AUC line names excluded findings.", "Scores/AUC never shown as percentages (test)."]
+verification = ["pnpm --dir web test"]
+docs = []
+dod = ["Evaluation owner reviewed wording."]
+
+[[issue]]
+id = "KS-WEB-07"
+title = "Accessibility and responsive verification across all pages"
+epic = "KS-EPIC-WEB"
+type = "task"
+priority = "P1"
+workstream = "frontend"
+owner_role = "Design/frontend with QA reviewer"
+depends_on = ["KS-WEB-01", "KS-WEB-02", "KS-WEB-03", "KS-WEB-04", "KS-WEB-05", "KS-WEB-06"]
+problem = """Accessibility and responsiveness regress easily when features land separately."""
+outcome = """Automated axe checks for every page state in component tests, a manual keyboard and screen-reader pass, reduced-motion and 200% zoom checks, and screenshots at 1440, 1024, 768 and 375 px."""
+scope = ["Add vitest-axe (or jest-axe) checks.", "Manual checklist in docs/accessibility.md with results.", "Fix violations or file follow-ups with severity."]
+exclusions = ["WCAG AAA."]
+guidance = """Contrast tokens are verified by scripts/check_design_tokens.py; component-level contrast (e.g. text on hatch) still needs manual checks."""
+files = ["web/src/**/*.test.tsx", "docs/accessibility.md"]
+contract_impact = "None."
+design_refs = ["DESIGN.md §15 Responsive", "DESIGN.md §16 Accessibility", "DESIGN.md §13 Motion"]
+acceptance = ["axe reports zero serious/critical violations for Studies, Review (each finding state), Evaluation (available and unavailable).", "docs/accessibility.md records keyboard-only completion of the full workflow and screen-reader announcement of analysis completion.", "No horizontal page scroll at 375px on any page (screenshots).", "With prefers-reduced-motion, no CSS transitions run (test or manual check recorded)."]
+verification = ["pnpm --dir web test", "python3 scripts/check_design_tokens.py"]
+docs = ["docs/accessibility.md", "DESIGN.md if rules change"]
+dod = ["QA reviewer signs the checklist."]
+
+[[issue]]
+id = "KS-WEB-08"
+title = "[Conditional] Client support for job-and-poll predictions"
+epic = "KS-EPIC-WEB"
+type = "conditional"
+priority = "P2"
+workstream = "frontend"
+owner_role = "Design/frontend"
+depends_on = ["KS-OPS-04"]
+trigger = "Triggered only if KS-OPS-04 is triggered and implemented."
+problem = """If the API returns 202 with a job, the UI must poll and show progress without implying the result is live before it arrives."""
+outcome = """Prediction client handles 202 + poll_url with backoff, shows queued/running steps, supports cancel-by-navigation, and renders the final PredictionResponse unchanged."""
+scope = ["Polling with capped backoff.", "Timeout and error states.", "Tests with mocked 202 then 200."]
+exclusions = ["WebSockets/SSE."]
+guidance = """Keep the existing synchronous path working."""
+files = ["web/src/api/client.ts", "web/src/components/findings/"]
+contract_impact = "Consumes the job contract from contracts/README.md §6 (added by KS-OPS-04)."
+design_refs = ["DESIGN.md §9.6 Run analysis"]
+acceptance = ["Test: 202 then 200 renders the final result with its provenance.", "Test: polling stops on unmount.", "Test: job failure shows 'Analysis failed' with code."]
+verification = ["pnpm --dir web test"]
+docs = ["DESIGN.md §9.6 if status text changes"]
+dod = ["Verified against the real job endpoint."]

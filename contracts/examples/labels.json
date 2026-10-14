@@ -1,0 +1,36 @@
+{
+  "body": {
+    "dataset_id": null,
+    "labels": [
+      {
+        "finding_id": "acl",
+        "provenance": "fixture",
+        "source_ref": "contracts/fixtures/labels.json",
+        "state": "positive"
+      },
+      {
+        "finding_id": "mcl",
+        "provenance": "fixture",
+        "source_ref": "contracts/fixtures/labels.json",
+        "state": "negative"
+      },
+      {
+        "finding_id": "medial_meniscus",
+        "provenance": "fixture",
+        "source_ref": "contracts/fixtures/labels.json",
+        "state": "unknown"
+      },
+      {
+        "finding_id": "lateral_meniscus",
+        "provenance": "fixture",
+        "source_ref": "contracts/fixtures/labels.json",
+        "state": "not_labeled"
+      }
+    ],
+    "notice": "Dataset labels are for evaluation only. They are never used by the model.",
+    "origin": "fixture",
+    "schema_version": "0.1.0",
+    "study_id": "fx-study-001"
+  },
+  "status": 200
+}

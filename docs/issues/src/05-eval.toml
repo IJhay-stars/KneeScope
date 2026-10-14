@@ -1,0 +1,184 @@
+[[issue]]
+id = "KS-EVAL-01"
+title = "Metrics module: per-finding AUCs with undefined handling, counts, threshold metrics and macro AUC"
+epic = "KS-EPIC-EVAL"
+type = "task"
+priority = "P0"
+workstream = "evaluation"
+owner_role = "Evaluation"
+depends_on = []
+problem = """Every downstream number flows through one metrics implementation. It must exclude unknown labels, report undefined ROC AUC explicitly when a partition has one class, never convert undefined to 0 or 0.5, and emit a MetricsSnapshot that validates against the contract."""
+outcome = """kneescope_ml.evaluation.compute_metrics(scores, labels, partition, ...) returns a MetricsSnapshot with per-finding counts, ROC AUC, PR AUC, prevalence, sensitivity/specificity at a supplied threshold, Brier score, and macro AUC with included/excluded lists."""
+scope = ["Implement with scikit-learn (ml extra) or numpy.", "Unknown and not_labeled excluded per finding; n_unknown reported.", "Single-class → undefined_single_class with reason.", "Macro AUC over defined findings only; excluded listed.", "Unit tests on hand-computed small examples."]
+exclusions = ["Threshold selection (KS-EVAL-02).", "Bootstrap confidence intervals (optional; may be added later)."]
+guidance = """Can start now on synthetic arrays. 'Accuracy' is not part of the snapshot."""
+files = ["ml/kneescope_ml/evaluation.py", "tests/ml/test_evaluation.py"]
+contract_impact = "Produces MetricsSnapshot/FindingMetrics (contracts §9). No schema change expected; any needed field is a contract change."
+acceptance = ["Test: labels [1,1,1] for a finding → roc_auc.status 'undefined_single_class', value null, and the finding appears in macro_roc_auc.excluded.", "Test: unknown labels are excluded from both counts and AUC (result equals AUC on the known subset).", "Test: ROC AUC on a hand-computed 6-sample example matches to 1e-9.", "Output validates as MetricsSnapshot (status 'available', origin 'dataset') when given complete metadata."]
+verification = ["uv sync --extra ml && pytest tests/ml/test_evaluation.py"]
+docs = ["contracts/README.md §9 (only if behaviour clarifies)"]
+dod = ["Reviewed by someone from modelling."]
+[issue.science]
+dataset = "Synthetic arrays in tests."
+partition = "Parameter of the function; never inferred."
+metrics = "ROC AUC, PR AUC, prevalence, sensitivity, specificity, Brier, macro ROC AUC."
+cannot_claim = "Accuracy; that macro AUC covers excluded findings."
+artifacts = "Unit tests with hand-computed values."
+
+[[issue]]
+id = "KS-EVAL-02"
+title = "Select per-finding operating thresholds on the validation partition"
+epic = "KS-EPIC-EVAL"
+type = "task"
+priority = "P1"
+workstream = "evaluation"
+owner_role = "Evaluation"
+depends_on = ["KS-EVAL-01", "KS-MODEL-03"]
+problem = """Sensitivity and specificity require a declared threshold. Choosing it on test data or after looking at test results inflates numbers."""
+outcome = """A documented rule (e.g. maximise Youden's J, or reach a target sensitivity) applied on validation scores only, producing per-finding thresholds stored with the checkpoint metadata and exposed as FindingResult.threshold."""
+scope = ["Declare the rule before computing.", "Store thresholds in artifacts/runs/<id>/thresholds.json and reference from config/model.toml.", "If a finding's validation set is single-class, no threshold (null)."]
+exclusions = ["Interactive threshold slider (optional KS-OPT-03)."]
+guidance = """Thresholds are operating points for a research display, not clinical cut-offs. The UI shows 'Above/Below threshold' only when a threshold exists."""
+files = ["ml/kneescope_ml/evaluation.py", "scripts/select_thresholds.py", "tests/ml/test_thresholds.py"]
+contract_impact = "Populates FindingResult.threshold/above_threshold and FindingMetrics.threshold_selected_on='validation'."
+acceptance = ["Rule recorded in docs/decisions.md before thresholds are computed (commit order visible in PR).", "Test proves the selector refuses a partition named 'test'.", "thresholds.json lists every supported finding with a value or null and a reason."]
+verification = ["pytest tests/ml/test_thresholds.py", "python scripts/select_thresholds.py --run <run_id> --split validation"]
+docs = ["docs/decisions.md", "docs/model-card.md"]
+dod = ["Thresholds referenced by served config."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "Validation only."
+metrics = "Sensitivity, specificity at the selected threshold."
+cannot_claim = "That thresholds are clinically appropriate."
+artifacts = "thresholds.json with rule name and run_id."
+
+[[issue]]
+id = "KS-EVAL-03"
+title = "Held-out evaluation run and published metrics snapshot"
+epic = "KS-EPIC-EVAL"
+type = "task"
+priority = "P0"
+workstream = "evaluation"
+owner_role = "Evaluation"
+depends_on = ["KS-MODEL-03", "KS-MODEL-01", "KS-EVAL-02", "KS-DATA-08"]
+problem = """The metrics page must show measured performance of the served checkpoint on a documented partition with sample counts, and distinguish validation results from untouched test results."""
+outcome = """scripts/evaluate.py produces artifacts/metrics/<model_version>.json (a MetricsSnapshot) for the final partition — 'test' only if the test partition was untouched during development, otherwise 'validation' — including comparator results in the model card and inference measurements from KS-OPS-03 when available."""
+scope = ["Run the served checkpoint once on the final partition.", "Include per-finding counts, undefined AUCs, macro AUC with exclusions.", "Record split method and grouping unit.", "Copy the snapshot to the location served by GET /metrics (KS-API-05)."]
+exclusions = ["Re-running test evaluation after changes to model or thresholds (would make it a validation result)."]
+guidance = """If the result is weak, publish it. A useful failure analysis (KS-EVAL-04) is stronger evidence than an inflated number. Do not describe AUC as accuracy."""
+files = ["scripts/evaluate.py", "artifacts/metrics/ (decide tracked vs untracked by data terms)", "docs/model-card.md"]
+contract_impact = "Produces MetricsSnapshot served by /metrics."
+acceptance = ["Snapshot validates as MetricsSnapshot with status 'available', partition set, split_method, grouping_unit, n_studies, created_at, model.checkpoint_sha256.", "Every retained finding shows n_positive, n_negative, n_unknown.", "If partition is 'test', docs/experiments.md shows no prior test evaluation of this or earlier checkpoints.", "Comparator snapshot from KS-MODEL-01 on the same partition exists."]
+verification = ["python scripts/evaluate.py --run <run_id> --split test|validation", "python scripts/validate_artifact.py MetricsSnapshot artifacts/metrics/<model_version>.json"]
+docs = ["docs/model-card.md (evaluation)", "docs/experiments.md"]
+dod = ["Independent reviewer (QA role) re-runs the script and gets identical numbers."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "Untouched test if available; otherwise validation, labelled as such."
+metrics = "Per-finding ROC AUC, PR AUC, prevalence, sens/spec at validation threshold, Brier, macro AUC; latency/memory if measured."
+cannot_claim = "Cross-site generalisation from single-site data; accuracy; clinical validity; calibrated probabilities."
+artifacts = "Snapshot JSON with checkpoint SHA, seed, split hash, script version."
+
+[[issue]]
+id = "KS-EVAL-04"
+title = "Error analysis: false positives, false negatives and failure cases"
+epic = "KS-EPIC-EVAL"
+type = "task"
+priority = "P1"
+workstream = "evaluation"
+owner_role = "Evaluation with Labels reviewer"
+depends_on = ["KS-EVAL-03"]
+problem = """Numbers alone do not show how the model fails. The demo must include an honest failure case, and the model card must list known failure modes."""
+outcome = """docs/error-analysis.md with categorised FP/FN examples (by study ID only, no patient data), patterns observed (e.g. missing planes, protocol differences), and subgroup results only where metadata and counts support them."""
+scope = ["Review top-scoring negatives and lowest-scoring positives per finding.", "Categorise causes; note label quality issues.", "Pick candidate failure cases for the demo.", "Subgroups only with stated minimum counts."]
+exclusions = ["Clinical interpretation of images beyond what labels state."]
+guidance = """Screenshots of restricted data stay local unless the permitted-use table allows sharing."""
+files = ["docs/error-analysis.md", "scripts/error_analysis.py"]
+contract_impact = "None."
+acceptance = ["At least 5 FP and 5 FN (or all, if fewer) reviewed per retained finding with a category each.", "Failure modes summarised in the model card limitations.", "Subgroup table either present with counts ≥ the stated minimum or explicitly omitted with reason."]
+verification = ["python scripts/error_analysis.py --run <run_id> --split <partition>"]
+docs = ["docs/error-analysis.md", "docs/model-card.md"]
+dod = ["Demo owner has the candidate failure cases."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "Same partition as KS-EVAL-03."
+metrics = "Counts per error category."
+cannot_claim = "Causal explanations for model errors."
+artifacts = "Case list (IDs only), categories, script."
+
+[[issue]]
+id = "KS-EVAL-05"
+title = "[Conditional] Calibration assessment and temperature scaling"
+epic = "KS-EPIC-EVAL"
+type = "conditional"
+priority = "P2"
+workstream = "evaluation"
+owner_role = "Evaluation"
+depends_on = ["KS-EVAL-03"]
+trigger = "Triggered only if the validation partition has enough positives per finding to assess calibration (threshold recorded in docs/decisions.md, e.g. ≥50 positives and ≥50 negatives)."
+problem = """Scores are uncalibrated by default. Calling them probabilities requires evidence."""
+outcome = """Reliability diagrams and Brier score before/after temperature scaling fitted on validation; if adopted, score_kind becomes calibrated_probability only for findings that pass, and the model card says so."""
+scope = ["Fit temperature on validation.", "Assess on the final partition.", "Update ScoreKind only where justified."]
+exclusions = ["Isotonic regression on small samples."]
+guidance = """Until this passes, the UI and docs say 'model score'."""
+files = ["ml/kneescope_ml/calibration.py", "tests/ml/test_calibration.py", "docs/model-card.md"]
+contract_impact = "score_kind may change to calibrated_probability; MetricsSnapshot.calibration='assessed'."
+acceptance = ["Sample-size threshold recorded before fitting.", "Reliability diagram data and Brier scores per finding saved.", "Test: temperature scaling never changes ranking (AUC identical before/after)."]
+verification = ["pytest tests/ml/test_calibration.py"]
+docs = ["docs/model-card.md", "docs/decisions.md"]
+dod = ["UI wording verified for calibrated vs uncalibrated."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "Fit on validation; assess on final partition."
+metrics = "Brier score, reliability bins."
+cannot_claim = "Calibration on other sites or datasets."
+artifacts = "Temperature values, reliability data."
+
+[[issue]]
+id = "KS-EVAL-06"
+title = "Complete the model card from evaluated evidence"
+epic = "KS-EPIC-EVAL"
+type = "task"
+priority = "P0"
+workstream = "evaluation"
+owner_role = "Evaluation"
+depends_on = ["KS-EVAL-03", "KS-EVAL-04", "KS-LABEL-01"]
+problem = """docs/model-card.md is a template and contracts/fixtures/model-card.json is a fixture draft. The served card must describe the actual model, data, labels, evaluation, calibration status, explanations and limitations."""
+outcome = """docs/model-card.md filled; artifacts/model-card/<model_version>.json (ModelCard, status 'published', origin 'dataset') generated from it and served by GET /model-card."""
+scope = ["Fill every template section with sources.", "Generate the JSON with scripts/build_model_card.py.", "Limitations include dataset scope, partition type, single-site caveat if applicable, calibration status, explanation caveat."]
+exclusions = ["Claims not backed by an artifact."]
+guidance = """Every number in the card must link to a snapshot file or experiment entry."""
+files = ["docs/model-card.md", "scripts/build_model_card.py"]
+contract_impact = "Produces ModelCard (contracts)."
+acceptance = ["No template placeholder text ('TBD', '<…>') remains (scripts/check_docs.py).", "Generated JSON validates as ModelCard with status 'published'.", "Every metric in the card matches the KS-EVAL-03 snapshot (script check)."]
+verification = ["python scripts/build_model_card.py --check", "python scripts/validate_artifact.py ModelCard artifacts/model-card/<model_version>.json"]
+docs = ["docs/model-card.md"]
+dod = ["Reviewed by QA role against the snapshot."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "As in KS-EVAL-03."
+metrics = "As in KS-EVAL-03."
+cannot_claim = "Anything not in the snapshot or experiment log."
+artifacts = "Card markdown and JSON with model_version."
+
+[[issue]]
+id = "KS-EVAL-07"
+science_exempt = "Caches outputs of the live path; produces no metrics."
+title = "Precompute cached predictions for the demo studies with full provenance"
+epic = "KS-EPIC-EVAL"
+type = "task"
+priority = "P1"
+workstream = "evaluation"
+owner_role = "Evaluation with Backend reviewer"
+depends_on = ["KS-API-04", "KS-DATA-10"]
+problem = """The demo needs a fallback that works without live inference, but cached results must never look fresh."""
+outcome = """scripts/precompute_predictions.py runs the live path once per manifest study and stores cache entries keyed by model, checkpoint, preprocessing and profile; the API serves them with source 'cached' and original computed_at."""
+scope = ["Use the API's live path (not a reimplementation).", "Store under the configured cache_dir.", "Verify each entry round-trips as source 'cached'."]
+exclusions = ["Hand-editing cache entries."]
+guidance = """Regenerate after any model or preprocessing version change; stale keys are cache misses by design."""
+files = ["scripts/precompute_predictions.py", "tests/api/test_cache_roundtrip.py"]
+contract_impact = "None (uses PredictionResponse with source 'cached')."
+acceptance = ["Every manifest study has a cache entry whose provenance.source is 'cached' when served and whose computed_at precedes served_at.", "Changing preprocessing version in config makes the API miss the cache (test)."]
+verification = ["python scripts/precompute_predictions.py --manifest artifacts/manifest/studies.json", "pytest tests/api/test_cache_roundtrip.py"]
+docs = ["README.md 'Cached mode'", "docs/demo-script.md"]
+dod = ["Demo owner has run the cached path offline."]

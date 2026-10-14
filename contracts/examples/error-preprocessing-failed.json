@@ -1,0 +1,12 @@
+{
+  "body": {
+    "error": {
+      "code": "PREPROCESSING_FAILED",
+      "detail": null,
+      "message": "Fixture: preprocessing could not read the sagittal series.",
+      "request_id": "<volatile>",
+      "retryable": false
+    }
+  },
+  "status": 422
+}

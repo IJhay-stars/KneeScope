@@ -1,0 +1,128 @@
+{
+  "notice": "FIXTURE - hand-written placeholder scores. Not model outputs. Values are arbitrary and carry no performance meaning.",
+  "studies": {
+    "fx-study-001": {
+      "findings": {
+        "acl": {
+          "status": "scored",
+          "score": 0.71,
+          "explanation_available": true
+        },
+        "mcl": {
+          "status": "scored",
+          "score": 0.07,
+          "explanation_available": false
+        },
+        "medial_meniscus": {
+          "status": "failed",
+          "reason": {
+            "code": "INFERENCE_FAILED",
+            "message": "Fixture: inference for this finding failed."
+          }
+        },
+        "abnormal": {
+          "status": "scored",
+          "score": 0.64,
+          "explanation_available": true
+        },
+        "acl_tear": {
+          "status": "scored",
+          "score": 0.41,
+          "explanation_available": false
+        },
+        "meniscal_tear": {
+          "status": "scored",
+          "score": 0.18,
+          "explanation_available": false
+        }
+      }
+    },
+    "fx-study-002": {
+      "findings": {
+        "acl": {
+          "status": "scored",
+          "score": 0.22,
+          "explanation_available": false
+        },
+        "mcl": {
+          "status": "scored",
+          "score": 0.31,
+          "explanation_available": false
+        },
+        "medial_meniscus": {
+          "status": "scored",
+          "score": 0.58,
+          "explanation_available": false
+        },
+        "abnormal": {
+          "status": "scored",
+          "score": 0.52,
+          "explanation_available": false
+        },
+        "acl_tear": {
+          "status": "scored",
+          "score": 0.09,
+          "explanation_available": false
+        },
+        "meniscal_tear": {
+          "status": "scored",
+          "score": 0.47,
+          "explanation_available": false
+        }
+      }
+    },
+    "fx-study-003": {
+      "study_error": {
+        "code": "PREPROCESSING_FAILED",
+        "message": "Fixture: preprocessing could not read the sagittal series.",
+        "retryable": false
+      }
+    },
+    "fx-study-004": {
+      "findings": {
+        "acl": {
+          "status": "unavailable",
+          "reason": {
+            "code": "INPUT_INVALID",
+            "message": "Sagittal series missing; the model requires a sagittal series."
+          }
+        },
+        "mcl": {
+          "status": "unavailable",
+          "reason": {
+            "code": "INPUT_INVALID",
+            "message": "Sagittal series missing; the model requires a sagittal series."
+          }
+        },
+        "medial_meniscus": {
+          "status": "unavailable",
+          "reason": {
+            "code": "INPUT_INVALID",
+            "message": "Sagittal series missing; the model requires a sagittal series."
+          }
+        },
+        "abnormal": {
+          "status": "unavailable",
+          "reason": {
+            "code": "INPUT_INVALID",
+            "message": "Sagittal series missing; the model requires a sagittal series."
+          }
+        },
+        "acl_tear": {
+          "status": "unavailable",
+          "reason": {
+            "code": "INPUT_INVALID",
+            "message": "Sagittal series missing; the model requires a sagittal series."
+          }
+        },
+        "meniscal_tear": {
+          "status": "unavailable",
+          "reason": {
+            "code": "INPUT_INVALID",
+            "message": "Sagittal series missing; the model requires a sagittal series."
+          }
+        }
+      }
+    }
+  }
+}

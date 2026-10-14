@@ -1,0 +1,64 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "api_version": {
+      "title": "Api Version",
+      "type": "string"
+    },
+    "finding_profile": {
+      "title": "Finding Profile",
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "fixture",
+        "model"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "model_loaded": {
+      "title": "Model Loaded",
+      "type": "boolean"
+    },
+    "model_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Model Version"
+    },
+    "preprocessing_version": {
+      "title": "Preprocessing Version",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "degraded"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "api_version",
+    "mode",
+    "model_loaded",
+    "model_version",
+    "preprocessing_version",
+    "finding_profile"
+  ],
+  "title": "Health",
+  "type": "object"
+}

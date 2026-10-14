@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KneeScope Design Concept</title>
+<meta name="description" content="Lightbox & Ledger design concept for KneeScope. Illustrative fixtures only; no real data or predictions.">
+<!-- Fonts load when online; the fallback stacks in DESIGN.md §5 apply offline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ks-lb-bg: #191714;
+  --ks-lb-panel: #211F1B;
+  --ks-lb-raised: #2A2722;
+  --ks-lb-line: #3A362F;
+  --ks-lb-line-strong: #746C5E;
+  --ks-lb-text: #EDE7DA;
+  --ks-lb-text-muted: #B9B1A1;
+  --ks-lb-text-faint: #958C7C;
+  --ks-lb-accent: #AEB27A;
+  --ks-lb-accent-strong: #C3C690;
+  --ks-lb-on-accent: #16150F;
+  --ks-lb-cached: #D2AE5E;
+  --ks-lb-failed: #D9805B;
+  --ks-lb-focus: #E6C98A;
+  --ks-viewer-well: #0D0D0D;
+  --ks-viewer-text: #D9D9D9;
+  --ks-lg-paper: #EFE9DC;
+  --ks-lg-paper-2: #E5DDCB;
+  --ks-lg-line: #C9BEA6;
+  --ks-lg-ink: #1E1B16;
+  --ks-lg-ink-muted: #575043;
+  --ks-lg-accent: #555A2A;
+  --ks-lg-failed: #93421F;
+  --ks-lg-cached: #7A5A12;
+
+  --ks-font-sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --ks-font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --ks-font-serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+
+  --ks-space-1: 4px; --ks-space-2: 8px; --ks-space-3: 12px; --ks-space-4: 16px;
+  --ks-space-5: 24px; --ks-space-6: 32px; --ks-space-7: 48px;
+  --ks-radius-control: 2px; --ks-radius-panel: 4px;
+  --ks-ease: cubic-bezier(.2,0,0,1);
+  /* Hatch used for FIXTURE provenance: an SVG pattern, not a gradient. */
+  --ks-hatch: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 1l2-2M0 6l6-6M5 7l2-2' stroke='%23746C5E' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--ks-lb-bg);
+  color: var(--ks-lb-text);
+  font: 400 14px/1.45 var(--ks-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ks-lb-focus); outline-offset: 2px; }
+.mono { font-family: var(--ks-font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--ks-lb-text-muted); }
+.faint { color: var(--ks-lb-text-faint); }
+.micro { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ks-lb-text-faint); font-weight: 500; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* Concept banner (only in the concept, not in the product) */
+.concept-banner {
+  display: flex; gap: var(--ks-space-4); align-items: center; flex-wrap: wrap;
+  padding: 6px var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line);
+  background: var(--ks-lb-bg); font-size: 12px; color: var(--ks-lb-text-muted);
+}
+.concept-banner strong { color: var(--ks-lb-text); font-weight: 600; }
+
+/* App frame */
+.app { display: grid; grid-template-rows: auto 48px 1fr 32px; min-height: 100vh; }
+.topbar {
+  display: flex; align-items: center; gap: var(--ks-space-5);
+  padding: 0 var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); background: var(--ks-lb-panel);
+}
+.wordmark { display: flex; align-items: baseline; gap: var(--ks-space-3); white-space: nowrap; }
+.wordmark b { font-weight: 600; font-size: 16px; letter-spacing: .01em; }
+.wordmark b span { color: var(--ks-lb-accent); }
+.wordmark small { color: var(--ks-lb-text-faint); font-size: 12px; }
+.nav { display: flex; height: 100%; }
+.nav button {
+  background: none; border: 0; padding: 0 var(--ks-space-3); height: 100%;
+  color: var(--ks-lb-text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: color 120ms var(--ks-ease);
+}
+.nav button:hover { color: var(--ks-lb-text); }
+.nav button[aria-current="page"] { color: var(--ks-lb-text); border-bottom-color: var(--ks-lb-accent); }
+.topbar .spacer { flex: 1; }
+.mode-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px;
+  border: 1px solid var(--ks-lb-line-strong); border-radius: var(--ks-radius-control);
+  font-size: 12px; white-space: nowrap;
+}
+.hatch-block { width: 14px; height: 10px; background: var(--ks-lb-raised) var(--ks-hatch); border: 1px solid var(--ks-lb-line-strong); display: inline-block; }
+.footer {
+  display: flex; align-items: center; gap: var(--ks-space-3); padding: 0 var(--ks-space-4);
+  border-top: 1px solid var(--ks-lb-line); background: var(--ks-lb-panel); font-size: 12px; color: var(--ks-lb-text-muted);
+  overflow: hidden; white-space: nowrap;
+}
+.footer b { color: var(--ks-lb-text); font-weight: 500; }
+.footer a { color: var(--ks-lb-accent); }
+main { min-height: 0; min-width: 0; }
+.app > * { min-width: 0; }
+.view[hidden] { display: none !important; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; padding: 0 12px; border-radius: var(--ks-radius-control);
+  border: 1px solid var(--ks-lb-line-strong); background: transparent; color: var(--ks-lb-text);
+  cursor: pointer; transition: background 120ms var(--ks-ease); white-space: nowrap;
+}
+.btn:hover:not(:disabled) { background: var(--ks-lb-raised); }
+.btn.primary { background: var(--ks-lb-accent); border-color: var(--ks-lb-accent); color: var(--ks-lb-on-accent); font-weight: 500; }
+.btn.primary:hover:not(:disabled) { background: var(--ks-lb-accent-strong); }
+.btn.quiet { border-color: transparent; color: var(--ks-lb-accent); padding: 0 6px; }
+.btn.quiet:hover:not(:disabled) { background: transparent; text-decoration: underline; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.icon-btn { width: 32px; padding: 0; }
+svg.i { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: square; flex: none; }
+kbd {
+  font-family: var(--ks-font-mono); font-size: 11px; padding: 0 4px; border: 1px solid var(--ks-lb-line-strong);
+  border-radius: 2px; color: var(--ks-lb-text-muted);
+}
+
+/* ===== Study browser ===== */
+.browser { padding: var(--ks-space-6) var(--ks-space-6); max-width: 1180px; margin: 0 auto; }
+.page-head { display: flex; align-items: end; justify-content: space-between; gap: var(--ks-space-4); flex-wrap: wrap; margin-bottom: var(--ks-space-5); }
+.page-head h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+.page-head p { margin: 0; color: var(--ks-lb-text-muted); max-width: 64ch; }
+.field {
+  height: 32px; padding: 0 10px; min-width: 240px; border-radius: var(--ks-radius-control);
+  border: 1px solid var(--ks-lb-line-strong); background: var(--ks-lb-bg);
+}
+.field::placeholder { color: var(--ks-lb-text-faint); }
+.table-wrap { border: 1px solid var(--ks-lb-line); border-radius: var(--ks-radius-panel); overflow-x: auto; background: var(--ks-lb-panel); }
+table.studies { width: 100%; border-collapse: collapse; min-width: 720px; }
+table.studies th { text-align: left; font-weight: 500; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ks-lb-text-faint); padding: 10px 14px; border-bottom: 1px solid var(--ks-lb-line); }
+table.studies td { padding: 0 14px; height: 44px; border-bottom: 1px solid var(--ks-lb-line); }
+table.studies tr:last-child td { border-bottom: 0; }
+table.studies tbody tr { cursor: pointer; transition: background 120ms var(--ks-ease); }
+table.studies tbody tr:hover { background: var(--ks-lb-raised); }
+table.studies td.num { text-align: right; }
+.study-id { font-family: var(--ks-font-mono); }
+.planes { display: inline-flex; gap: 4px; font-family: var(--ks-font-mono); font-size: 12px; }
+.plane-slot { width: 22px; height: 22px; display: inline-grid; place-items: center; border: 1px solid var(--ks-lb-line-strong); border-radius: 2px; }
+.plane-slot.missing { border-style: dashed; color: var(--ks-lb-text-faint); }
+.origin { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.status { display: inline-flex; align-items: center; gap: 6px; }
+.status.cached { color: var(--ks-lb-cached); }
+.status.failed { color: var(--ks-lb-failed); }
+.status.live { color: var(--ks-lb-accent); }
+.table-note { margin-top: var(--ks-space-3); font-size: 12px; color: var(--ks-lb-text-faint); }
+.study-cards { display: none; }
+
+/* ===== Review workspace ===== */
+.workspace { display: grid; grid-template-columns: 260px minmax(520px, 1fr) 360px; height: 100%; min-height: 0; }
+.rail { border-right: 1px solid var(--ks-lb-line); background: var(--ks-lb-panel); overflow-y: auto; }
+.rail h2, .col-head h2 { font-size: 13px; font-weight: 600; margin: 0; }
+.rail-head { padding: var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); display: flex; justify-content: space-between; align-items: center; }
+.rail-item {
+  display: block; width: 100%; text-align: left; background: none; border: 0; border-left: 2px solid transparent;
+  padding: 10px var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); cursor: pointer;
+}
+.rail-item:hover { background: var(--ks-lb-raised); }
+.rail-item[aria-current="true"] { background: var(--ks-lb-raised); border-left-color: var(--ks-lb-accent); }
+.rail-item .row1 { display: flex; justify-content: space-between; align-items: center; }
+.rail-item .row2 { font-size: 12px; color: var(--ks-lb-text-muted); margin-top: 2px; }
+
+.stage { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; min-height: 0; background: var(--ks-lb-bg); }
+.stage-head { display: flex; align-items: center; justify-content: space-between; gap: var(--ks-space-3); padding: var(--ks-space-3) var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); flex-wrap: wrap; }
+.tabs { display: inline-flex; border: 1px solid var(--ks-lb-line-strong); border-radius: var(--ks-radius-control); }
+.tabs button {
+  background: none; border: 0; height: 30px; padding: 0 14px; cursor: pointer; color: var(--ks-lb-text-muted);
+  border-right: 1px solid var(--ks-lb-line); border-bottom: 2px solid transparent;
+}
+.tabs button:last-child { border-right: 0; }
+.tabs button[aria-selected="true"] { color: var(--ks-lb-text); background: var(--ks-lb-raised); border-bottom-color: var(--ks-lb-accent); }
+.tabs button[aria-disabled="true"] { color: var(--ks-lb-text-faint); cursor: not-allowed; border-bottom: 2px dashed var(--ks-lb-line-strong); }
+.series-select { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ks-lb-text-muted); }
+select.field { min-width: 0; height: 30px; }
+
+.viewer { position: relative; margin: var(--ks-space-3) var(--ks-space-4) 0; background: var(--ks-viewer-well); min-height: 320px; overflow: hidden; }
+.viewer.fixture::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--ks-hatch); z-index: 2; }
+.viewer canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: auto; }
+.viewer .corner { position: absolute; z-index: 3; font: 12px/1.4 var(--ks-font-mono); color: var(--ks-viewer-text); padding: 10px 12px; pointer-events: none; }
+.corner.tl { top: 0; left: 4px; } .corner.tr { top: 0; right: 0; text-align: right; }
+.corner.bl { bottom: 0; left: 4px; } .corner.br { bottom: 0; right: 0; text-align: right; }
+.viewer-empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--ks-viewer-text); z-index: 3; padding: 24px; }
+.viewer-empty p { margin: 6px 0 0; color: #A8A8A8; font-size: 13px; max-width: 42ch; }
+
+.controls { display: flex; align-items: center; gap: var(--ks-space-2); padding: var(--ks-space-2) var(--ks-space-4) var(--ks-space-3); flex-wrap: wrap; }
+.controls .sep { width: 1px; height: 20px; background: var(--ks-lb-line); margin: 0 4px; }
+input[type=range] { flex: 1; min-width: 120px; accent-color: var(--ks-lb-accent); height: 24px; }
+.slice-readout { min-width: 64px; text-align: center; }
+
+.findings { border-left: 1px solid var(--ks-lb-line); background: var(--ks-lb-panel); display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+.col-head { padding: var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); display: flex; justify-content: space-between; align-items: center; gap: var(--ks-space-3); }
+.col-head p { margin: 2px 0 0; font-size: 12px; color: var(--ks-lb-text-faint); }
+.run-status { padding: var(--ks-space-3) var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); font-size: 12px; }
+.steps { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; }
+.steps li { display: flex; gap: 8px; color: var(--ks-lb-text-faint); }
+.steps li.done { color: var(--ks-lb-text-muted); }
+.steps li.active { color: var(--ks-lb-text); }
+.steps li .m { width: 12px; font-family: var(--ks-font-mono); }
+
+.prov { padding: var(--ks-space-3) var(--ks-space-4); border-bottom: 1px solid var(--ks-lb-line); display: grid; gap: 6px; font-size: 12px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: var(--ks-radius-control); font-size: 11px; font-weight: 600; letter-spacing: .06em; width: max-content; }
+.badge.live { color: var(--ks-lb-accent); border: 1px solid var(--ks-lb-accent); }
+.badge.cached { color: var(--ks-lb-cached); border: 1px dashed var(--ks-lb-cached); }
+.badge.fixture { color: var(--ks-lb-text); border: 1px solid var(--ks-lb-line-strong); background: var(--ks-lb-raised) var(--ks-hatch); }
+.badge.fixture span { background: var(--ks-lb-raised); padding: 0 3px; }
+.prov dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; }
+.prov dt { color: var(--ks-lb-text-faint); }
+.prov dd { margin: 0; font-family: var(--ks-font-mono); }
+
+.finding { position: relative; border-bottom: 1px solid var(--ks-lb-line); border-left: 2px solid transparent; }
+.finding.fixture::before { content: ""; position: absolute; left: -2px; top: 0; bottom: 0; width: 4px; background: var(--ks-hatch); }
+.finding[aria-current="true"] { background: var(--ks-lb-raised); border-left-color: var(--ks-lb-accent); }
+.finding-main { display: grid; grid-template-columns: 18px 1fr auto; gap: 10px; align-items: center; width: 100%; padding: 12px var(--ks-space-4) 8px; background: none; border: 0; text-align: left; cursor: pointer; }
+.finding-name { font-weight: 500; }
+.finding-score { font-family: var(--ks-font-mono); font-size: 15px; }
+.finding-state { font-size: 12px; color: var(--ks-lb-text-muted); text-align: right; }
+.finding-state.failed { color: var(--ks-lb-failed); }
+.finding-sub { padding: 0 var(--ks-space-4) 10px 44px; display: grid; gap: 6px; }
+.bar { position: relative; height: 6px; background: var(--ks-lb-bg); border: 1px solid var(--ks-lb-line); }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--ks-lb-text); }
+.finding-actions { display: flex; gap: 4px; flex-wrap: wrap; margin-left: -6px; }
+.label-reveal { font-size: 12px; padding: 6px 8px; border: 1px solid var(--ks-lb-line); background: var(--ks-lb-bg); }
+.glyph { width: 16px; height: 16px; }
+.unsupported .finding-name { color: var(--ks-lb-text-muted); }
+
+.explain { padding: var(--ks-space-4); display: grid; gap: var(--ks-space-3); }
+.explain h3 { margin: 0; font-size: 13px; font-weight: 600; }
+.note { font-size: 12px; color: var(--ks-lb-text-muted); border-left: 2px solid var(--ks-lb-line-strong); padding-left: 10px; }
+.slice-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.slice-chips button { height: 28px; padding: 0 10px; font-family: var(--ks-font-mono); font-size: 12px; }
+.legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ks-lb-text-muted); }
+.legend .ramp { display: inline-flex; height: 8px; }
+.legend .ramp i { width: 14px; display: block; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.toggle input { accent-color: var(--ks-lb-accent); width: 16px; height: 16px; }
+
+/* ===== Ledger (evaluation) ===== */
+.ledger-wrap { padding: var(--ks-space-6) var(--ks-space-4) var(--ks-space-7); overflow-y: auto; height: 100%; }
+.ledger {
+  max-width: 920px; margin: 0 auto; background: var(--ks-lg-paper); color: var(--ks-lg-ink);
+  border: 1px solid var(--ks-lg-line); border-radius: var(--ks-radius-panel); padding: var(--ks-space-7);
+  font-size: 15px; line-height: 1.55;
+}
+.ledger .kicker { font: 500 11px/1 var(--ks-font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ks-lg-ink-muted); }
+.ledger h1 { font: 600 28px/1.2 var(--ks-font-serif); margin: 8px 0 4px; letter-spacing: -.005em; }
+.ledger h2 { font: 600 19px/1.3 var(--ks-font-serif); margin: var(--ks-space-6) 0 var(--ks-space-3); display: flex; gap: 10px; align-items: baseline; }
+.ledger h2 .n { font: 500 12px var(--ks-font-mono); color: var(--ks-lg-accent); }
+.ledger p { margin: 0 0 10px; max-width: 70ch; }
+.ledger .lede { color: var(--ks-lg-ink-muted); }
+.ledger hr { border: 0; border-top: 1px solid var(--ks-lg-line); margin: var(--ks-space-5) 0; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border-top: 1px solid var(--ks-lg-ink); border-bottom: 1px solid var(--ks-lg-line); margin-top: var(--ks-space-5); }
+.facts div { padding: 10px 12px 12px 0; }
+.facts div:not(:nth-child(3n+1)) { padding-left: 12px; border-left: 1px solid var(--ks-lg-line); }
+.facts div:nth-child(n+4) { border-top: 1px solid var(--ks-lg-line); }
+.facts dt { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ks-lg-ink-muted); }
+.facts dd { margin: 4px 0 0; font-size: 14px; }
+.facts .pending { color: var(--ks-lg-failed); }
+.ledger-table-wrap { overflow-x: auto; }
+table.metrics { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+table.metrics caption { text-align: left; font-size: 12px; color: var(--ks-lg-ink-muted); padding-bottom: 8px; caption-side: top; }
+table.metrics th { text-align: right; font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; padding: 8px 10px; border-top: 1px solid var(--ks-lg-ink); border-bottom: 1px solid var(--ks-lg-ink); color: var(--ks-lg-ink); }
+table.metrics th:first-child, table.metrics td:first-child { text-align: left; padding-left: 0; }
+table.metrics td { text-align: right; padding: 0 10px; height: 40px; border-bottom: 1px solid var(--ks-lg-line); font-family: var(--ks-font-mono); font-variant-numeric: tabular-nums; color: var(--ks-lg-ink-muted); }
+table.metrics td:first-child { font-family: var(--ks-font-sans); color: var(--ks-lg-ink); font-weight: 500; }
+table.metrics tbody tr:nth-child(even) { background: var(--ks-lg-paper-2); }
+.unavail-row td.span { text-align: left; font-family: var(--ks-font-sans); color: var(--ks-lg-failed); }
+.footnotes { font-size: 13px; color: var(--ks-lg-ink-muted); padding-left: 18px; }
+.footnotes li { margin-bottom: 6px; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--ks-space-5); }
+.ledger a { color: var(--ks-lg-accent); }
+.ledger .stamp { display: inline-block; font: 600 11px var(--ks-font-sans); letter-spacing: .08em; border: 1px solid var(--ks-lg-failed); color: var(--ks-lg-failed); padding: 2px 8px; border-radius: 2px; }
+
+/* ===== States gallery ===== */
+.states { padding: var(--ks-space-6); max-width: 1180px; margin: 0 auto; }
+.spec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--ks-space-4); }
+.spec { border: 1px solid var(--ks-lb-line); border-radius: var(--ks-radius-panel); background: var(--ks-lb-panel); display: flex; flex-direction: column; }
+.spec header { padding: 10px 14px; border-bottom: 1px solid var(--ks-lb-line); display: flex; justify-content: space-between; align-items: center; }
+.spec header h3 { margin: 0; font-size: 13px; font-weight: 600; }
+.spec .body { padding: 14px; display: grid; gap: 10px; }
+.skel { height: 12px; background: var(--ks-lb-raised); }
+.skel.w60 { width: 60%; } .skel.w80 { width: 80%; } .skel.w40 { width: 40%; }
+.msg { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; }
+.msg h4 { margin: 0 0 2px; font-size: 14px; font-weight: 600; }
+.msg p { margin: 0; color: var(--ks-lb-text-muted); font-size: 13px; }
+.msg.err h4 { color: var(--ks-lb-failed); }
+.code-line { font: 12px var(--ks-font-mono); color: var(--ks-lb-text-faint); }
+.mini-well { background: var(--ks-viewer-well); height: 120px; display: grid; place-items: center; color: var(--ks-viewer-text); font-size: 13px; text-align: center; padding: 12px; }
+.mini-ledger { background: var(--ks-lg-paper); color: var(--ks-lg-ink); padding: 12px 14px; font-size: 13px; border: 1px solid var(--ks-lg-line); }
+.mini-ledger .mono { color: var(--ks-lg-failed); }
+
+/* Shortcut sheet */
+dialog { background: var(--ks-lb-panel); color: var(--ks-lb-text); border: 1px solid var(--ks-lb-line-strong); border-radius: var(--ks-radius-panel); padding: 0; max-width: 440px; width: calc(100% - 32px); }
+dialog::backdrop { background: rgba(0,0,0,.55); }
+dialog header { padding: 12px 16px; border-bottom: 1px solid var(--ks-lb-line); display: flex; justify-content: space-between; align-items: center; }
+dialog header h2 { margin: 0; font-size: 14px; }
+dialog table { width: 100%; border-collapse: collapse; font-size: 13px; }
+dialog td { padding: 7px 16px; border-bottom: 1px solid var(--ks-lb-line); }
+dialog td:first-child { width: 40%; white-space: nowrap; }
+
+/* Responsive (DESIGN.md §15) */
+@media (max-width: 1199px) {
+  .workspace { grid-template-columns: minmax(0,1fr) 320px; }
+  .rail { display: none; }
+  .study-switch { display: flex !important; }
+}
+@media (max-width: 899px) {
+  .workspace { grid-template-columns: 1fr; height: auto; }
+  .findings { border-left: 0; border-top: 1px solid var(--ks-lb-line); }
+  .viewer { min-height: 0; aspect-ratio: 1 / 1; }
+  .app { grid-template-rows: auto auto 1fr auto; }
+  .topbar { flex-wrap: wrap; padding: 8px 16px; gap: 8px 16px; }
+  .footer { white-space: normal; padding: 8px 16px; }
+  .facts { grid-template-columns: 1fr; }
+  .facts div:not(:nth-child(3n+1)) { padding-left: 0; border-left: 0; }
+  .facts div + div { border-top: 1px solid var(--ks-lg-line); }
+  .two-col { grid-template-columns: 1fr; }
+  .ledger { padding: var(--ks-space-5); }
+}
+@media (max-width: 599px) {
+  .browser, .states { padding: var(--ks-space-5) 16px; }
+  .table-wrap { display: none; }
+  .study-cards { display: grid; gap: 8px; }
+  .study-card { border: 1px solid var(--ks-lb-line); background: var(--ks-lb-panel); border-radius: var(--ks-radius-panel); padding: 12px; display: grid; gap: 6px; text-align: left; width: 100%; cursor: pointer; }
+  .wordmark small { display: none; }
+  .field { min-width: 0; width: 100%; }
+  .kbd-hint { display: none; }
+  .viewer { margin: 8px 16px 0; }
+  .controls { padding: 8px 16px 12px; }
+  .ledger-wrap { padding: 16px 0 32px; }
+  .ledger { border-left: 0; border-right: 0; border-radius: 0; padding: 24px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="g-scored" viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9" fill="currentColor"/></symbol>
+    <symbol id="g-noteval" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="g-unavail" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 2"/></symbol>
+    <symbol id="g-unsupported" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 11.5l7-7" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="g-failed" viewBox="0 0 16 16"><path d="M8 2.5l6 11H2z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter"/><path d="M8 6.5v3.2M8 11.2v1" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="g-clock" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3.2l2 1.3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-first" viewBox="0 0 16 16"><path d="M4 3v10M12 3L6.5 8 12 13"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 16 16"><path d="M10.5 3L5 8l5.5 5"/></symbol>
+    <symbol id="i-next" viewBox="0 0 16 16"><path d="M5.5 3L11 8l-5.5 5"/></symbol>
+    <symbol id="i-last" viewBox="0 0 16 16"><path d="M12 3v10M4 3l5.5 5L4 13"/></symbol>
+    <symbol id="i-zin" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M14 14l-3.8-3.8M7 5v4M5 7h4"/></symbol>
+    <symbol id="i-zout" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M14 14l-3.8-3.8M5 7h4"/></symbol>
+    <symbol id="i-fit" viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 16 16"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v2.8h-2.8"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <div class="concept-banner" role="note">
+    <strong>Design concept</strong>
+    <span>Lightbox &amp; Ledger · all studies, scores, and labels are illustrative fixtures · imagery is a synthetic phantom, not an MRI · analysis runs are simulated in the browser</span>
+  </div>
+
+  <header class="topbar">
+    <div class="wordmark"><b>Knee<span>Scope</span></b><small>Knee MRI research review</small></div>
+    <nav class="nav" aria-label="Primary">
+      <button data-view="studies">Studies</button>
+      <button data-view="review">Review</button>
+      <button data-view="evaluation">Evaluation</button>
+      <button data-view="states">States</button>
+    </nav>
+    <div class="spacer"></div>
+    <label class="series-select kbd-hint" for="profile">Finding scope
+      <select id="profile" class="field" aria-describedby="profile-note">
+        <option value="rsna4">RSNA subset (4 findings)</option>
+        <option value="mrnet3">MRNet (3 findings)</option>
+      </select>
+    </label>
+    <span id="profile-note" class="sr-only">Concept control: the finding list follows the selected dataset profile.</span>
+    <span class="mode-chip" title="No model is loaded. Results come from development fixtures."><span class="hatch-block" aria-hidden="true"></span>Fixture mode</span>
+  </header>
+
+  <main>
+    <!-- ================= STUDY BROWSER ================= -->
+    <section class="view browser" id="view-studies" aria-labelledby="studies-title">
+      <div class="page-head">
+        <div>
+          <h1 id="studies-title">Studies</h1>
+          <p>Studies permitted for this build. Only the metadata needed for review is shown. These rows are development fixtures, not dataset studies.</p>
+        </div>
+        <input class="field" type="search" placeholder="Filter by study ID" aria-label="Filter studies by ID" id="study-filter">
+      </div>
+      <div class="table-wrap">
+        <table class="studies">
+          <thead><tr><th scope="col">Study</th><th scope="col">Origin</th><th scope="col">Planes</th><th scope="col" class="num">Series</th><th scope="col">Analysis</th><th scope="col"><span class="sr-only">Action</span></th></tr></thead>
+          <tbody id="study-rows"></tbody>
+        </table>
+      </div>
+      <div class="study-cards" id="study-cards"></div>
+      <p class="table-note">Planes: S sagittal · C coronal · A axial. A dashed slot means the plane is not available in this study.</p>
+    </section>
+
+    <!-- ================= REVIEW WORKSPACE ================= -->
+    <section class="view workspace" id="view-review" aria-label="Review workspace" hidden>
+      <aside class="rail" aria-label="Study list">
+        <div class="rail-head"><h2>Studies</h2><span class="micro">Fixtures</span></div>
+        <div id="rail-items"></div>
+      </aside>
+
+      <div class="stage">
+        <div class="stage-head">
+          <div class="study-switch" style="display:none;align-items:center;gap:8px">
+            <label class="micro" for="study-switch">Study</label>
+            <select id="study-switch" class="field"></select>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Imaging plane" id="plane-tabs"></div>
+          <div class="series-select"><label for="series">Series</label><select id="series" class="field"></select></div>
+        </div>
+
+        <div class="viewer" id="viewer">
+          <canvas id="canvas" role="img" aria-label=""></canvas>
+          <div class="corner tl" id="c-tl"></div>
+          <div class="corner tr">Synthetic phantom<br>not an MRI</div>
+          <div class="corner bl" id="c-bl"></div>
+          <div class="corner br" id="c-br"></div>
+          <div class="viewer-empty" id="viewer-empty" hidden></div>
+        </div>
+
+        <div class="controls" aria-label="Slice controls">
+          <button class="btn icon-btn" id="b-first" aria-label="First slice (Home)" title="First slice · Home"><svg class="i"><use href="#i-first"/></svg></button>
+          <button class="btn icon-btn" id="b-prev" aria-label="Previous slice (Up or K)" title="Previous slice · ↑ / K"><svg class="i"><use href="#i-prev"/></svg></button>
+          <input type="range" id="slider" min="1" max="30" value="15" aria-label="Slice">
+          <button class="btn icon-btn" id="b-next" aria-label="Next slice (Down or J)" title="Next slice · ↓ / J"><svg class="i"><use href="#i-next"/></svg></button>
+          <button class="btn icon-btn" id="b-last" aria-label="Last slice (End)" title="Last slice · End"><svg class="i"><use href="#i-last"/></svg></button>
+          <span class="mono slice-readout" id="readout">15 / 30</span>
+          <span class="sep" aria-hidden="true"></span>
+          <button class="btn icon-btn" id="b-zout" aria-label="Zoom out (minus)" title="Zoom out · −"><svg class="i"><use href="#i-zout"/></svg></button>
+          <button class="btn icon-btn" id="b-zin" aria-label="Zoom in (plus)" title="Zoom in · +"><svg class="i"><use href="#i-zin"/></svg></button>
+          <button class="btn icon-btn" id="b-fit" aria-label="Fit to view (0)" title="Fit · 0"><svg class="i"><use href="#i-fit"/></svg></button>
+          <button class="btn" id="b-adjust" aria-pressed="false" title="Changes the rendered PNG only. Not MRI window/level."><svg class="i"><use href="#i-sun"/></svg>Display adjust</button>
+          <button class="btn quiet kbd-hint" id="b-keys"><kbd>?</kbd> Shortcuts</button>
+        </div>
+      </div>
+
+      <aside class="findings" aria-label="Findings">
+        <div class="col-head">
+          <div><h2>Findings</h2><p id="findings-sub">Model scores, not diagnoses</p></div>
+          <button class="btn primary" id="run">Run analysis</button>
+        </div>
+        <div class="run-status" id="run-status" hidden aria-live="polite"></div>
+        <div class="prov" id="prov" hidden></div>
+        <div id="finding-rows"></div>
+        <div class="explain" id="explain"></div>
+      </aside>
+    </section>
+
+    <!-- ================= EVALUATION / MODEL CARD ================= -->
+    <section class="view ledger-wrap" id="view-evaluation" aria-label="Evaluation and model card" hidden>
+      <article class="ledger">
+        <div class="kicker">Evaluation &amp; model card · snapshot <span class="mono">none</span></div>
+        <h1>No evaluated checkpoint yet</h1>
+        <p class="lede">This page reports measured performance for the checkpoint that serves predictions. Until a checkpoint is trained and evaluated on a documented partition, every metric reads “Metrics unavailable”. Nothing here is estimated or carried over from other projects.</p>
+        <span class="stamp">METRICS UNAVAILABLE</span>
+
+        <dl class="facts">
+          <div><dt>Dataset</dt><dd class="pending">Decision pending — access and terms not yet verified</dd></div>
+          <div><dt>Partition</dt><dd>Not defined · validation vs held-out test will be stated here</dd></div>
+          <div><dt>Grouping unit</dt><dd>Study, grouped by patient where identifiers exist</dd></div>
+          <div><dt>Model version</dt><dd class="mono">—</dd></div>
+          <div><dt>Preprocessing</dt><dd class="mono">prep-0.0.0-placeholder</dd></div>
+          <div><dt>Score type</dt><dd>Uncalibrated model score</dd></div>
+        </dl>
+
+        <h2><span class="n">01</span>Per-finding performance</h2>
+        <div class="ledger-table-wrap">
+          <table class="metrics">
+            <caption>Counts exclude studies whose dataset label is unknown for that finding. Unknown is never treated as negative.</caption>
+            <thead><tr><th scope="col">Finding</th><th scope="col">Positives</th><th scope="col">Negatives</th><th scope="col">Unknown</th><th scope="col">ROC AUC</th><th scope="col">PR AUC</th><th scope="col">Prevalence</th><th scope="col">Sens @ thr</th><th scope="col">Spec @ thr</th></tr></thead>
+            <tbody id="metric-rows"></tbody>
+          </table>
+        </div>
+        <p style="margin-top:12px;font-size:13px;color:var(--ks-lg-ink-muted)">Macro ROC AUC: <span class="mono">unavailable</span> — will state how many findings it averages and which were excluded as undefined.</p>
+
+        <h2><span class="n">02</span>Inference measurements</h2>
+        <p>Latency (p50, p95) and peak memory: <b>not measured</b>. Measured on the serving hardware before deciding whether synchronous inference is sufficient.</p>
+
+        <div class="two-col">
+          <div>
+            <h2><span class="n">03</span>Intended use</h2>
+            <p>Research and teaching review of knee MRI studies that the team is permitted to use. Lets a reviewer compare model scores with dataset labels and inspect limitations.</p>
+          </div>
+          <div>
+            <h2><span class="n">04</span>Out of scope</h2>
+            <p>Diagnosis, triage, treatment decisions, use on studies outside the permitted dataset, and any claim about clinical benefit or cross-site generalisation.</p>
+          </div>
+        </div>
+
+        <h2><span class="n">05</span>Known limitations</h2>
+        <ol class="footnotes">
+          <li>Scores are uncalibrated. A score of 0.85 is not an 85% chance of injury.</li>
+          <li>ROC AUC measures ranking, not accuracy. An AUC of 0.80 is not “80% correct”.</li>
+          <li>Model attention and influential slices show what affected the score; they do not localise an injury.</li>
+          <li>A model trained on one dataset is not validated on another. Single-site evaluation does not establish generalisation across sites or scanners.</li>
+          <li>Separate MRI planes are independent acquisitions and are not spatially synchronised in the viewer.</li>
+        </ol>
+        <hr>
+        <p style="font-size:12px;color:var(--ks-lg-ink-muted);margin:0">Ledger presentation · DESIGN.md §9.11–9.12. In the product this page is filled from <span class="mono">GET /metrics</span> and <span class="mono">GET /model-card</span>.</p>
+      </article>
+    </section>
+
+    <!-- ================= STATES ================= -->
+    <section class="view states" id="view-states" aria-labelledby="states-title" hidden>
+      <div class="page-head">
+        <div>
+          <h1 id="states-title">State specimens</h1>
+          <p>Representative loading, empty, and error states (DESIGN.md §10–11). Values are placeholders for layout; none are measurements.</p>
+        </div>
+      </div>
+      <div class="spec-grid">
+        <div class="spec"><header><h3>Loading — study list</h3><span class="micro">aria-busy</span></header>
+          <div class="body" aria-busy="true">
+            <div class="code-line">Loading studies… 1.2 s</div>
+            <div class="skel w80"></div><div class="skel w60"></div><div class="skel w80"></div><div class="skel w40"></div>
+          </div></div>
+
+        <div class="spec"><header><h3>Loading — analysis</h3><span class="micro">live region</span></header>
+          <div class="body">
+            <div><b>Analysing…</b> <span class="faint mono">4 s</span></div>
+            <ol class="steps"><li class="done"><span class="m">✓</span>Loading series</li><li class="active"><span class="m">›</span>Preprocessing (prep-0.0.0)</li><li><span class="m">·</span>Model</li><li><span class="m">·</span>Done</li></ol>
+          </div></div>
+
+        <div class="spec"><header><h3>Empty — no studies</h3></header>
+          <div class="body"><div class="msg"><svg class="glyph" style="color:var(--ks-lb-text-faint)"><use href="#g-noteval"/></svg>
+            <div><h4>No permitted studies</h4><p>The study manifest is empty. Add studies you are permitted to use with <span class="mono">scripts/build_manifest.py</span>, or start the API in fixture mode.</p></div></div></div></div>
+
+        <div class="spec"><header><h3>Error — API unreachable</h3></header>
+          <div class="body"><div class="msg err"><svg class="glyph" style="color:var(--ks-lb-failed)"><use href="#g-failed"/></svg>
+            <div><h4>Studies could not be loaded</h4><p>The API did not respond. Check that it is running on the configured port.</p>
+              <div class="code-line" style="margin-top:6px">code API_UNREACHABLE · request —</div>
+              <button class="btn" style="margin-top:10px"><svg class="i"><use href="#i-retry"/></svg>Retry</button></div></div></div></div>
+
+        <div class="spec"><header><h3>Missing series</h3></header>
+          <div class="body"><div class="mini-well"><div><b>Axial series not available</b><br><span style="color:#A8A8A8;font-size:12px">This study has no axial acquisition. Choose sagittal or coronal.</span></div></div></div></div>
+
+        <div class="spec"><header><h3>Failed analysis</h3></header>
+          <div class="body">
+            <div class="msg err"><svg class="glyph" style="color:var(--ks-lb-failed)"><use href="#g-failed"/></svg>
+              <div><h4>Analysis failed</h4><p>Preprocessing could not read the sagittal series. Scores were not produced; nothing is shown in their place.</p>
+              <div class="code-line" style="margin-top:6px">code PREPROCESSING_FAILED · retryable: no · request fx-req-0003</div></div></div></div></div>
+
+        <div class="spec"><header><h3>Five finding states</h3></header>
+          <div class="body" style="gap:8px">
+            <div class="msg"><svg class="glyph"><use href="#g-scored"/></svg><div><b>Scored</b> <span class="mono">0.07</span> <span class="faint">— a low score, not a failure</span></div></div>
+            <div class="msg"><svg class="glyph"><use href="#g-noteval"/></svg><div><b>Not evaluated</b> <span class="faint">— analysis not run yet</span></div></div>
+            <div class="msg"><svg class="glyph"><use href="#g-unavail"/></svg><div><b>Unavailable</b> <span class="faint">— required series missing</span></div></div>
+            <div class="msg"><svg class="glyph" style="color:var(--ks-lb-text-muted)"><use href="#g-unsupported"/></svg><div><b>Not supported</b> <span class="faint">— model has no output for it</span></div></div>
+            <div class="msg err"><svg class="glyph" style="color:var(--ks-lb-failed)"><use href="#g-failed"/></svg><div><b style="color:var(--ks-lb-failed)">Failed</b> <span class="faint">— inference error with code</span></div></div>
+          </div></div>
+
+        <div class="spec"><header><h3>Result provenance</h3></header>
+          <div class="body">
+            <span class="badge live"><svg class="glyph"><use href="#g-scored"/></svg>LIVE · computed now</span>
+            <span class="badge cached"><svg class="glyph"><use href="#g-clock"/></svg>CACHED · checkpoint a1b2c3d</span>
+            <span class="badge fixture"><span>FIXTURE — not a model output</span></span>
+            <p class="faint" style="margin:0;font-size:12px">Text and shape carry the meaning; colour reinforces it.</p>
+          </div></div>
+
+        <div class="spec"><header><h3>Undefined AUC (ledger)</h3></header>
+          <div class="body"><div class="mini-ledger">ROC AUC for a finding with no positive studies in the partition:<br><span class="mono">Undefined — one class only (n+ = 0)</span><br><span style="color:var(--ks-lg-ink-muted);font-size:12px">Never shown as 0, 0.5, or omitted. Excluded from macro AUC with a note.</span></div></div></div>
+
+        <div class="spec"><header><h3>Explanation unavailable</h3></header>
+          <div class="body"><div class="msg"><svg class="glyph"><use href="#g-unavail"/></svg>
+            <div><h4>Explanation unavailable</h4><p>Alignment check failed: overlay was computed for series <span class="mono">fx-ser-02</span>, viewer shows <span class="mono">fx-ser-01</span>. The score is unaffected; no overlay is drawn.</p></div></div></div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <b>Research prototype — not for diagnosis.</b>
+    <span>Scores are uncalibrated model outputs unless stated.</span>
+    <a href="#" onclick="return false">About data use</a>
+  </footer>
+</div>
+
+<dialog id="keys" aria-labelledby="keys-title">
+  <header><h2 id="keys-title">Keyboard shortcuts</h2><button class="btn icon-btn" id="keys-close" aria-label="Close">✕</button></header>
+  <table>
+    <tr><td><kbd>↑</kbd> <kbd>K</kbd> / <kbd>↓</kbd> <kbd>J</kbd></td><td>Previous / next slice</td></tr>
+    <tr><td><kbd>PgUp</kbd> / <kbd>PgDn</kbd></td><td>−10 / +10 slices</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>First / last slice</td></tr>
+    <tr><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></td><td>Sagittal / coronal / axial</td></tr>
+    <tr><td><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></td><td>Zoom in / out / fit</td></tr>
+    <tr><td><kbd>R</kbd></td><td>Run analysis (simulated here)</td></tr>
+    <tr><td><kbd>[</kbd> / <kbd>]</kbd></td><td>Previous / next finding</td></tr>
+    <tr><td><kbd>?</kbd></td><td>This sheet</td></tr>
+  </table>
+</dialog>
+
+<script>
+(() => {
+  "use strict";
+  // ---------- Fixtures (illustrative only) ----------
+  const PROFILES = {
+    rsna4: [
+      { id: "acl", name: "ACL" },
+      { id: "mcl", name: "MCL" },
+      { id: "medial_meniscus", name: "Medial meniscus" },
+      { id: "lateral_meniscus", name: "Lateral meniscus" },
+    ],
+    mrnet3: [
+      { id: "abnormal", name: "Abnormal (overall)" },
+      { id: "acl_tear", name: "ACL tear" },
+      { id: "meniscal_tear", name: "Meniscal tear" },
+    ],
+  };
+  const PLANES = ["sagittal", "coronal", "axial"];
+  const STUDIES = [
+    { id: "fx-study-001", label: "Fixture study 001", planes: { sagittal: [["fx-ser-01", "Sag PD FS", 30], ["fx-ser-04", "Sag T1", 24]], coronal: [["fx-ser-02", "Cor PD FS", 28]], axial: [["fx-ser-03", "Ax PD FS", 32]] }, analysis: "not_run" },
+    { id: "fx-study-002", label: "Fixture study 002", planes: { sagittal: [["fx-ser-11", "Sag PD FS", 26]], coronal: [["fx-ser-12", "Cor T2 FS", 22]] }, analysis: "cached" },
+    { id: "fx-study-003", label: "Fixture study 003", planes: { sagittal: [["fx-ser-21", "Sag PD FS", 34]], coronal: [["fx-ser-22", "Cor PD FS", 30]], axial: [["fx-ser-23", "Ax T2 FS", 36]] }, analysis: "failed" },
+    { id: "fx-study-004", label: "Fixture study 004", planes: { coronal: [["fx-ser-32", "Cor PD FS", 24]], axial: [["fx-ser-33", "Ax PD FS", 30]] }, analysis: "not_run" },
+  ];
+  // Fixture results. Scores are hand-written placeholders, not model outputs.
+  const RESULTS = {
+    rsna4: {
+      "fx-study-001": { source: "fixture", findings: {
+        acl: { status: "scored", score: 0.71 }, mcl: { status: "scored", score: 0.07 },
+        medial_meniscus: { status: "failed", code: "INFERENCE_FAILED" },
+        lateral_meniscus: { status: "unsupported" } } },
+      "fx-study-002": { source: "cached", findings: {
+        acl: { status: "scored", score: 0.22 }, mcl: { status: "scored", score: 0.31 },
+        medial_meniscus: { status: "scored", score: 0.58 }, lateral_meniscus: { status: "scored", score: 0.12 } } },
+      "fx-study-003": { source: "failed", code: "PREPROCESSING_FAILED" },
+      "fx-study-004": { source: "fixture", findings: Object.fromEntries(["acl","mcl","medial_meniscus","lateral_meniscus"].map(f => [f, { status: "unavailable", reason: "sagittal series missing" }])) },
+    },
+    mrnet3: {
+      "fx-study-001": { source: "fixture", findings: { abnormal: { status: "scored", score: 0.64 }, acl_tear: { status: "scored", score: 0.41 }, meniscal_tear: { status: "scored", score: 0.18 } } },
+      "fx-study-002": { source: "cached", findings: { abnormal: { status: "scored", score: 0.52 }, acl_tear: { status: "scored", score: 0.09 }, meniscal_tear: { status: "scored", score: 0.47 } } },
+      "fx-study-003": { source: "failed", code: "PREPROCESSING_FAILED" },
+      "fx-study-004": { source: "fixture", findings: Object.fromEntries(["abnormal","acl_tear","meniscal_tear"].map(f => [f, { status: "unavailable", reason: "sagittal series missing" }])) },
+    },
+  };
+  const LABELS = { positive: "Positive", negative: "Negative", unknown: "Unknown (not labelled)" };
+  const FIXTURE_LABEL = (studyId, fid) => ["unknown", "negative", "positive"][(studyId.length + fid.length) % 3];
+
+  // ---------- State ----------
+  const st = { view: "studies", study: STUDIES[0], plane: "sagittal", seriesIdx: 0, slice: 15, zoom: 1, adjust: false,
+    profile: "rsna4", result: null, running: false, selected: 0, revealed: new Set(), overlay: false };
+  const $ = (s) => document.querySelector(s);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const glyph = (id, color) => `<svg class="glyph" aria-hidden="true"${color ? ` style="color:${color}"` : ""}><use href="#${id}"/></svg>`;
+
+  // ---------- Navigation ----------
+  function show(view) {
+    st.view = view;
+    for (const v of ["studies", "review", "evaluation", "states"]) $("#view-" + v).hidden = v !== view;
+    document.querySelectorAll(".nav button").forEach((b) => { if (b.dataset.view === view) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    if (view === "review") { resize(); draw(); }
+    try { history.replaceState(null, "", "#" + view); } catch (_) {}
+  }
+  document.querySelectorAll(".nav button").forEach((b) => b.addEventListener("click", () => show(b.dataset.view)));
+
+  // ---------- Study browser ----------
+  const analysisCell = (s) => ({
+    not_run: `<span class="status">${glyph("g-noteval")}Not run</span>`,
+    cached: `<span class="status cached">${glyph("g-clock")}Cached</span>`,
+    failed: `<span class="status failed">${glyph("g-failed")}Failed</span>`,
+    live: `<span class="status live">${glyph("g-scored")}Live</span>`,
+  })[s.analysis];
+  const planeSlots = (s) => `<span class="planes">${PLANES.map((p) => s.planes[p]
+    ? `<span class="plane-slot" title="${p} available">${p[0].toUpperCase()}</span>`
+    : `<span class="plane-slot missing" title="${p} not available"><span aria-hidden="true">–</span><span class="sr-only">${p} missing</span></span>`).join("")}</span>`;
+  const seriesCount = (s) => Object.values(s.planes).reduce((n, l) => n + l.length, 0);
+  function renderStudies(filter = "") {
+    const rows = STUDIES.filter((s) => s.id.includes(filter.trim().toLowerCase()));
+    $("#study-rows").innerHTML = rows.length ? rows.map((s) => `
+      <tr data-id="${s.id}" tabindex="0" aria-label="Open ${s.id}">
+        <td><span class="study-id">${s.id}</span> <span class="faint">· ${esc(s.label)}</span></td>
+        <td><span class="origin"><span class="hatch-block" aria-hidden="true"></span>FIXTURE</span></td>
+        <td>${planeSlots(s)}</td><td class="num mono">${seriesCount(s)}</td>
+        <td>${analysisCell(s)}</td><td style="text-align:right"><span class="btn quiet" aria-hidden="true">Open →</span></td></tr>`).join("")
+      : `<tr><td colspan="6" style="height:64px" class="muted">No study matches “${esc(filter)}”.</td></tr>`;
+    $("#study-cards").innerHTML = rows.map((s) => `
+      <button class="study-card" data-id="${s.id}"><span class="study-id">${s.id}</span>
+      <span class="origin"><span class="hatch-block" aria-hidden="true"></span>FIXTURE · ${seriesCount(s)} series</span>
+      <span>${planeSlots(s)}</span><span>${analysisCell(s)}</span></button>`).join("");
+  }
+  function openStudy(id) { selectStudy(STUDIES.find((s) => s.id === id)); show("review"); }
+  $("#study-rows").addEventListener("click", (e) => { const tr = e.target.closest("tr[data-id]"); if (tr) openStudy(tr.dataset.id); });
+  $("#study-rows").addEventListener("keydown", (e) => { const tr = e.target.closest("tr[data-id]"); if (tr && e.key === "Enter") openStudy(tr.dataset.id); });
+  $("#study-cards").addEventListener("click", (e) => { const c = e.target.closest("[data-id]"); if (c) openStudy(c.dataset.id); });
+  $("#study-filter").addEventListener("input", (e) => renderStudies(e.target.value));
+
+  // ---------- Review ----------
+  function selectStudy(s) {
+    st.study = s; st.plane = PLANES.find((p) => s.planes[p]); st.seriesIdx = 0;
+    st.result = s.analysis === "cached" || s.analysis === "failed" ? RESULTS[st.profile][s.id] : null;
+    st.revealed.clear(); st.selected = 0; st.overlay = false;
+    resetSlice(); renderRail(); renderTabs(); renderFindings(); draw();
+  }
+  const series = () => st.study.planes[st.plane]?.[st.seriesIdx];
+  function resetSlice() { const se = series(); st.slice = se ? Math.ceil(se[2] / 2) : 1; st.zoom = 1; }
+  function renderRail() {
+    $("#rail-items").innerHTML = STUDIES.map((s) => `
+      <button class="rail-item" data-id="${s.id}" ${s === st.study ? 'aria-current="true"' : ""}>
+        <div class="row1"><span class="study-id">${s.id}</span>${planeSlots(s)}</div>
+        <div class="row2">${seriesCount(s)} series · ${s.analysis === "not_run" ? "not run" : s.analysis}</div></button>`).join("");
+    $("#study-switch").innerHTML = STUDIES.map((s) => `<option value="${s.id}" ${s === st.study ? "selected" : ""}>${s.id}</option>`).join("");
+  }
+  $("#rail-items").addEventListener("click", (e) => { const b = e.target.closest("[data-id]"); if (b) selectStudy(STUDIES.find((s) => s.id === b.dataset.id)); });
+  $("#study-switch").addEventListener("change", (e) => selectStudy(STUDIES.find((s) => s.id === e.target.value)));
+
+  function renderTabs() {
+    $("#plane-tabs").innerHTML = PLANES.map((p, i) => {
+      const ok = !!st.study.planes[p];
+      const label = p[0].toUpperCase() + p.slice(1);
+      return `<button role="tab" data-plane="${p}" aria-selected="${p === st.plane}" ${ok ? "" : 'aria-disabled="true"'}
+        tabindex="${p === st.plane ? 0 : -1}" title="${ok ? label + " · " + (i + 1) : label + " not available for this study"}">${ok ? label : label + " — not available"}</button>`;
+    }).join("");
+    const list = st.study.planes[st.plane] || [];
+    $("#series").innerHTML = list.map((se, i) => `<option value="${i}" ${i === st.seriesIdx ? "selected" : ""}>${se[1]} · ${se[2]} slices</option>`).join("");
+    $("#series").disabled = list.length < 2;
+  }
+  function setPlane(p) {
+    if (!st.study.planes[p]) return;
+    st.plane = p; st.seriesIdx = 0; resetSlice(); renderTabs(); draw();
+  }
+  $("#plane-tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-plane]"); if (b) setPlane(b.dataset.plane); });
+  $("#plane-tabs").addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const avail = PLANES.filter((p) => st.study.planes[p]);
+    const i = avail.indexOf(st.plane) + (e.key === "ArrowRight" ? 1 : -1);
+    setPlane(avail[(i + avail.length) % avail.length]);
+    $(`#plane-tabs [data-plane="${st.plane}"]`).focus(); e.preventDefault();
+  });
+  $("#series").addEventListener("change", (e) => { st.seriesIdx = +e.target.value; resetSlice(); draw(); });
+
+  // ---------- Synthetic phantom renderer (not anatomy) ----------
+  const canvas = $("#canvas"); const ctx = canvas.getContext("2d");
+  function resize() {
+    const r = $("#viewer").getBoundingClientRect(); const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(1, Math.round(r.width * dpr)); canvas.height = Math.max(1, Math.round(r.height * dpr));
+  }
+  function draw() {
+    const se = series(); const n = se ? se[2] : 0;
+    st.slice = Math.min(Math.max(st.slice, 1), Math.max(n, 1));
+    $("#slider").max = n || 1; $("#slider").value = st.slice; $("#slider").disabled = !se;
+    $("#slider").setAttribute("aria-valuetext", se ? `Slice ${st.slice} of ${n}` : "No series");
+    $("#readout").textContent = se ? `${st.slice} / ${n}` : "— / —";
+    const fixture = st.result && st.result.source === "fixture";
+    $("#viewer").classList.toggle("fixture", !!fixture);
+    const empty = $("#viewer-empty");
+    if (!se) {
+      empty.hidden = false;
+      empty.innerHTML = `<div><b>${st.plane} series not available</b><p>This study has no ${st.plane} acquisition.</p></div>`;
+      ctx.clearRect(0, 0, canvas.width, canvas.height); return;
+    }
+    empty.hidden = true;
+    const W = canvas.width, H = canvas.height; ctx.fillStyle = "#0D0D0D"; ctx.fillRect(0, 0, W, H);
+    const size = Math.min(W, H) * 0.86 * st.zoom; const x0 = (W - size) / 2, y0 = (H - size) / 2;
+    const g = (v) => { const a = st.adjust ? Math.min(255, Math.round((v - 30) * 1.25 + 30)) : v; return `rgb(${a},${a},${a})`; };
+    ctx.save(); ctx.beginPath(); ctx.rect(x0, y0, size, size); ctx.clip();
+    ctx.fillStyle = g(18); ctx.fillRect(x0, y0, size, size);
+    // Field of view grid
+    ctx.strokeStyle = g(34); ctx.lineWidth = Math.max(1, size / 512);
+    for (let i = 1; i < 8; i++) { const t = x0 + (size * i) / 8; ctx.beginPath(); ctx.moveTo(t, y0); ctx.lineTo(t, y0 + size); ctx.stroke(); const u = y0 + (size * i) / 8; ctx.beginPath(); ctx.moveTo(x0, u); ctx.lineTo(x0 + size, u); ctx.stroke(); }
+    // Sphere phantom: cross-section radius changes with slice position.
+    const z = (st.slice - 0.5) / n * 2 - 1; const R = size * 0.36;
+    const r = R * Math.sqrt(Math.max(0, 1 - z * z));
+    const cx = x0 + size / 2, cy = y0 + size * 0.46;
+    if (r > 0) { ctx.fillStyle = g(150); ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = g(92); ctx.beginPath(); ctx.arc(cx, cy, r * 0.62, 0, Math.PI * 2); ctx.fill();
+      const off = PLANES.indexOf(st.plane) * 0.18 + 0.2; const r2 = r * 0.2;
+      ctx.fillStyle = g(210); ctx.beginPath(); ctx.arc(cx - r * off, cy - r * 0.15, r2, 0, Math.PI * 2); ctx.fill(); }
+    // Step wedge (8 gray levels)
+    const wy = y0 + size * 0.88, wh = size * 0.06, ww = size * 0.8 / 8;
+    for (let i = 0; i < 8; i++) { ctx.fillStyle = g(Math.round(16 + i * 34)); ctx.fillRect(x0 + size * 0.1 + i * ww, wy, ww, wh); }
+    // Overlay: single-hue ochre to rust contours, only for fixture ACL explanation
+    if (st.overlay && st.result && st.result.findings) {
+      const ex = EXPL[currentFinding()?.id];
+      if (ex && ex.series === se[0] && ex.slices.includes(st.slice)) {
+        const ox = cx + r * 0.25, oy = cy + r * 0.1; const levels = [["rgba(201,148,74,0.30)", 0.55], ["rgba(205,120,70,0.45)", 0.36], ["rgba(178,84,44,0.65)", 0.2]];
+        for (const [c, k] of levels) { ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(ox, oy, R * k, R * k * 0.7, -0.4, 0, Math.PI * 2); ctx.fill(); }
+      }
+    }
+    ctx.restore();
+    $("#c-tl").innerHTML = `${st.study.id}<br>${esc(se[1])} · ${se[0]}`;
+    $("#c-bl").innerHTML = `${st.plane}<br>slice ${st.slice} / ${n}`;
+    $("#c-br").innerHTML = `zoom ${Math.round(st.zoom * 100)}%${st.adjust ? "<br>display adjust on" : ""}`;
+    canvas.setAttribute("aria-label", `Synthetic phantom, not an MRI. ${st.study.id}, ${st.plane} series ${se[0]}, slice ${st.slice} of ${n}.`);
+  }
+  const step = (d) => { st.slice += d; draw(); };
+  $("#b-first").onclick = () => { st.slice = 1; draw(); };
+  $("#b-last").onclick = () => { st.slice = 9999; draw(); };
+  $("#b-prev").onclick = () => step(-1); $("#b-next").onclick = () => step(1);
+  $("#slider").oninput = (e) => { st.slice = +e.target.value; draw(); };
+  const zoom = (f) => { st.zoom = f === 0 ? 1 : Math.min(4, Math.max(0.5, st.zoom * f)); draw(); };
+  $("#b-zin").onclick = () => zoom(1.25); $("#b-zout").onclick = () => zoom(0.8); $("#b-fit").onclick = () => zoom(0);
+  $("#b-adjust").onclick = (e) => { st.adjust = !st.adjust; e.currentTarget.setAttribute("aria-pressed", st.adjust); draw(); };
+
+  // ---------- Findings ----------
+  const EXPL = { acl: { series: "fx-ser-01", slices: [13, 14, 16] }, abnormal: { series: "fx-ser-01", slices: [12, 15] } };
+  const profile = () => PROFILES[st.profile];
+  const currentFinding = () => profile()[st.selected];
+  function renderFindings() {
+    const res = st.result; const runBtn = $("#run");
+    const noSag = !st.study.planes.sagittal;
+    runBtn.disabled = st.running; runBtn.textContent = st.running ? "Analysing…" : (res && res.source !== "failed" ? "Run again" : "Run analysis");
+    // Provenance strip
+    const prov = $("#prov");
+    if (res && res.source !== "failed") {
+      prov.hidden = false;
+      const badge = res.source === "fixture"
+        ? `<span class="badge fixture"><span>FIXTURE — not a model output</span></span>`
+        : `<span class="badge cached">${glyph("g-clock")}CACHED · from 2026-10-12 18:40 UTC</span>`;
+      prov.innerHTML = `${badge}<dl><dt>Model</dt><dd>${res.source === "fixture" ? "fixture-model (none loaded)" : "fx-ckpt · sha a1b2c3d"}</dd>
+        <dt>Preprocessing</dt><dd>prep-0.0.0-placeholder</dd><dt>${res.source === "fixture" ? "Run" : "Computed"}</dt><dd>${res.source === "fixture" ? "simulated in browser" : "2026-10-12 18:40 UTC (not now)"}</dd></dl>`;
+    } else prov.hidden = true;
+    const status = $("#run-status");
+    if (res && res.source === "failed" && !st.running) {
+      status.hidden = false;
+      status.innerHTML = `<div class="msg err">${glyph("g-failed", "var(--ks-lb-failed)")}<div><h4 style="color:var(--ks-lb-failed);margin:0 0 2px;font-size:13px">Analysis failed</h4>
+        <p class="muted" style="margin:0">Preprocessing could not read this study. No scores were produced.</p>
+        <div class="code-line" style="margin-top:4px">code ${res.code} · retryable: no · request fx-req-0003</div></div></div>`;
+    } else if (!st.running) status.hidden = true;
+
+    $("#finding-rows").innerHTML = profile().map((f, i) => {
+      let r = res && res.findings ? res.findings[f.id] : null;
+      if (!r) r = noSag && !res ? { status: "not_evaluated" } : { status: "not_evaluated" };
+      if (res && res.source === "failed") r = { status: "failed", code: res.code };
+      const fixture = res && res.source === "fixture";
+      const sel = i === st.selected;
+      let right = "", sub = "", g = "g-noteval", gc = "", cls = "";
+      if (r.status === "scored") { g = "g-scored"; right = `<span class="finding-score">${r.score.toFixed(2)}</span>`;
+        sub = `<div class="bar" aria-hidden="true"><i style="width:${r.score * 100}%"></i></div><div class="faint" style="font-size:12px">No validated threshold — score shown without a cut-off</div>`; }
+      else if (r.status === "not_evaluated") right = `<span class="finding-state">Not evaluated</span>`;
+      else if (r.status === "unavailable") { g = "g-unavail"; right = `<span class="finding-state">Unavailable</span>`; sub = `<div class="faint" style="font-size:12px">Unavailable — ${esc(r.reason)}</div>`; }
+      else if (r.status === "unsupported") { g = "g-unsupported"; gc = "var(--ks-lb-text-muted)"; cls = "unsupported"; right = `<span class="finding-state">Not supported</span>`; sub = `<div class="faint" style="font-size:12px">Not supported by this model</div>`; }
+      else if (r.status === "failed") { g = "g-failed"; gc = "var(--ks-lb-failed)"; right = `<span class="finding-state failed">Failed</span>`; sub = `<div class="code-line">Analysis failed — ${r.code}</div>`; }
+      const label = st.revealed.has(f.id)
+        ? `<div class="label-reveal">Dataset label: <b>${LABELS[FIXTURE_LABEL(st.study.id, f.id)]}</b><br><span class="faint">Provenance: fixture label, not from any dataset</span></div>`
+        : "";
+      const actions = sel ? `<div class="finding-actions">
+          <button class="btn quiet" data-reveal="${f.id}" aria-expanded="${st.revealed.has(f.id)}">${st.revealed.has(f.id) ? "Hide dataset label" : "Reveal dataset label"}</button></div>` : "";
+      const accName = `${f.name}, ${r.status === "scored" ? "model score " + r.score.toFixed(2) : r.status.replace("_", " ")}${fixture ? ", fixture, not a model output" : ""}`;
+      return `<div class="finding ${cls} ${fixture ? "fixture" : ""}" ${sel ? 'aria-current="true"' : ""}>
+        <button class="finding-main" data-i="${i}" aria-label="${esc(accName)}">${glyph(g, gc)}<span class="finding-name">${esc(f.name)}</span>${right}</button>
+        ${sub || actions || label ? `<div class="finding-sub">${sub}${label}${actions}</div>` : ""}</div>`;
+    }).join("");
+    renderExplain();
+  }
+  function renderExplain() {
+    const f = currentFinding(); const res = st.result; const box = $("#explain");
+    if (!res || !res.findings) { box.innerHTML = `<div class="note">Run analysis to see scores. Dataset labels stay hidden until you reveal them, and they are never used by the model.</div>`; return; }
+    const r = res.findings[f.id]; const ex = EXPL[f.id];
+    if (!r || r.status !== "scored" || !ex) {
+      box.innerHTML = `<h3>${esc(f.name)} · Explanation</h3><div class="msg">${glyph("g-unavail")}<div><h4 style="margin:0;font-size:13px">Explanation unavailable</h4><p class="muted" style="margin:0;font-size:12px">${r && r.status === "scored" ? "No explanation was produced for this finding." : "No score, so no explanation."}</p></div></div>`;
+      return;
+    }
+    box.innerHTML = `<h3>${esc(f.name)} · Influential slices <span class="faint" style="font-weight:400">(fixture)</span></h3>
+      <div class="slice-chips">${ex.slices.map((s) => `<button class="btn" data-jump="${s}" aria-label="Jump to sagittal slice ${s}">${s}</button>`).join("")}</div>
+      <label class="toggle"><input type="checkbox" id="ov" ${st.overlay ? "checked" : ""}> Show model attention overlay</label>
+      <div class="legend"><span class="ramp" aria-hidden="true"><i style="background:#C9944A;opacity:.6"></i><i style="background:#CD7846;opacity:.8"></i><i style="background:#B2542C"></i></span>Model attention (relative, not lesion location)</div>
+      <div class="note">Shows what influenced the model score; it does not localise an injury. Drawn only when series, slice, and model version match the viewer.</div>`;
+  }
+  $("#finding-rows").addEventListener("click", (e) => {
+    const m = e.target.closest("[data-i]"); if (m) { st.selected = +m.dataset.i; renderFindings(); draw(); return; }
+    const rv = e.target.closest("[data-reveal]"); if (rv) { const id = rv.dataset.reveal; st.revealed.has(id) ? st.revealed.delete(id) : st.revealed.add(id); renderFindings(); }
+  });
+  $("#explain").addEventListener("click", (e) => {
+    const j = e.target.closest("[data-jump]"); if (j) { setPlane("sagittal"); st.seriesIdx = 0; renderTabs(); st.slice = +j.dataset.jump; draw(); }
+  });
+  $("#explain").addEventListener("change", (e) => { if (e.target.id === "ov") { st.overlay = e.target.checked; draw(); } });
+
+  // ---------- Simulated analysis ----------
+  function run() {
+    if (st.running) return;
+    st.running = true; st.result = null; renderFindings(); draw();
+    const steps = ["Loading series", "Preprocessing (prep-0.0.0)", "Model (fixture — simulated)", "Done"];
+    const status = $("#run-status"); status.hidden = false; let i = 0; const t0 = performance.now();
+    const tick = () => {
+      status.innerHTML = `<b>Analysing…</b> <span class="faint mono">${((performance.now() - t0) / 1000).toFixed(1)} s · simulated</span>
+        <ol class="steps">${steps.map((s, k) => `<li class="${k < i ? "done" : k === i ? "active" : ""}"><span class="m">${k < i ? "✓" : k === i ? "›" : "·"}</span>${s}</li>`).join("")}</ol>`;
+      if (i < steps.length - 1) { i++; setTimeout(tick, 550); }
+      else {
+        st.running = false;
+        st.result = st.study.analysis === "failed" ? RESULTS[st.profile][st.study.id]
+          : st.study.planes.sagittal ? { ...RESULTS[st.profile]["fx-study-001"], source: "fixture" } : RESULTS[st.profile]["fx-study-004"];
+        status.innerHTML = st.result.source === "failed" ? "" : `<span class="faint">Analysis complete · simulated · results are fixtures</span>`;
+        renderFindings(); draw();
+      }
+    };
+    tick();
+  }
+  $("#run").addEventListener("click", run);
+
+  $("#profile").addEventListener("change", (e) => { st.profile = e.target.value; st.selected = 0; st.revealed.clear(); if (st.result) st.result = st.result.source === "failed" ? RESULTS[st.profile][st.study.id] : (st.study.analysis === "cached" ? RESULTS[st.profile][st.study.id] : null); renderFindings(); renderMetrics(); draw(); });
+
+  // ---------- Ledger metrics ----------
+  function renderMetrics() {
+    $("#metric-rows").innerHTML = profile().map((f) => `<tr class="unavail-row"><td>${esc(f.name)}</td><td>—</td><td>—</td><td>—</td><td class="span" colspan="6">Metrics unavailable — no evaluated checkpoint</td></tr>`).join("");
+  }
+
+  // ---------- Keyboard ----------
+  const keys = $("#keys");
+  $("#b-keys").onclick = () => keys.showModal(); $("#keys-close").onclick = () => keys.close();
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest("input, select, textarea") && e.target.type !== "range") return;
+    if (e.key === "?") { keys.open ? keys.close() : keys.showModal(); return; }
+    if (st.view !== "review" || keys.open || e.metaKey || e.ctrlKey || e.altKey) return;
+    const map = { ArrowUp: () => step(-1), k: () => step(-1), ArrowDown: () => step(1), j: () => step(1),
+      PageUp: () => step(-10), PageDown: () => step(10), Home: () => { st.slice = 1; draw(); }, End: () => { st.slice = 9999; draw(); },
+      "1": () => setPlane("sagittal"), "2": () => setPlane("coronal"), "3": () => setPlane("axial"),
+      "+": () => zoom(1.25), "=": () => zoom(1.25), "-": () => zoom(0.8), "0": () => zoom(0), r: run,
+      "[": () => { st.selected = Math.max(0, st.selected - 1); renderFindings(); draw(); },
+      "]": () => { st.selected = Math.min(profile().length - 1, st.selected + 1); renderFindings(); draw(); } };
+    if (e.target.type === "range" && /Arrow|Page|Home|End/.test(e.key)) return;
+    const fn = map[e.key]; if (fn) { fn(); e.preventDefault(); }
+  });
+
+  window.addEventListener("resize", () => { if (st.view === "review") { resize(); draw(); } });
+  renderStudies(); renderMetrics(); selectStudy(STUDIES[0]);
+  const initial = (location.hash || "#studies").slice(1);
+  show(["studies", "review", "evaluation", "states"].includes(initial) ? initial : "studies");
+})();
+</script>
+</body>
+</html>

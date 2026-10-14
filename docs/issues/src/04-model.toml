@@ -1,0 +1,130 @@
+[[issue]]
+id = "KS-MODEL-01"
+title = "Simple comparator baseline for every selected finding"
+epic = "KS-EPIC-MODEL"
+type = "task"
+priority = "P0"
+workstream = "modelling"
+owner_role = "Modelling"
+depends_on = ["KS-DATA-09", "KS-LABEL-01", "KS-EVAL-01"]
+problem = """A deep model's AUC means little without a reference. The plan requires comparison with a simple baseline."""
+outcome = """A documented simple comparator (e.g. logistic regression on per-plane intensity statistics and slice counts, plus the constant-prevalence predictor) evaluated on the same validation partition with the same metrics module."""
+scope = ["Implement comparator(s) in ml/kneescope_ml/baselines.py.", "Evaluate on validation with kneescope_ml.evaluation.", "Record results in the run registry."]
+exclusions = ["Tuning on the test partition."]
+guidance = """Keep it cheap. The constant predictor's ROC AUC is 0.5 by construction and only shows the metric pipeline works; the image-statistics comparator is the meaningful reference."""
+files = ["ml/kneescope_ml/baselines.py", "scripts/run_baselines.py", "tests/ml/test_baselines.py"]
+contract_impact = "None."
+acceptance = ["scripts/run_baselines.py writes a MetricsSnapshot-shaped JSON for the comparator on the validation partition.", "Comparator results appear in the model card evaluation section next to the main model (KS-EVAL-06).", "Test runs the comparator end to end on synthetic tensors."]
+verification = ["pytest tests/ml/test_baselines.py", "python scripts/run_baselines.py --split validation"]
+docs = ["docs/model-card.md", "docs/experiments.md"]
+dod = ["Results reproducible from the recorded seed and split hash."]
+[issue.science]
+dataset = "Selected dataset, cached tensors."
+partition = "Validation."
+metrics = "Per-finding ROC AUC, PR AUC, prevalence, counts."
+cannot_claim = "Clinical meaning of any comparator score."
+artifacts = "Run directory with config, seed, split hash, metrics JSON."
+
+[[issue]]
+id = "KS-MODEL-02"
+title = "Training pipeline with config, seeding, checkpointing and experiment provenance"
+epic = "KS-EPIC-MODEL"
+type = "task"
+priority = "P0"
+workstream = "modelling"
+owner_role = "Modelling"
+depends_on = []
+problem = """Training must be reproducible and auditable before any real data arrives: each run records its config, seed, git commit, preprocessing version, split hash and checkpoint hash. Building this on synthetic phantom data unblocks modelling while data access is pending."""
+outcome = """scripts/train.py runs end to end on the fixture adapter's synthetic volumes with random labels (clearly marked smoke data), writes artifacts/runs/<run_id>/ with config.toml, metadata.json (git SHA, seed, prep version, split hash or 'synthetic'), checkpoint and its SHA-256, and appends to docs/experiments.md."""
+scope = ["Model skeleton: pretrained-capable 2D backbone per slice, masked pooling per plane, plane fusion respecting plane masks, independent sigmoid heads per profile finding.", "Masked BCE (unknown labels excluded).", "Deterministic seeding, checkpoint save/resume.", "Run metadata and experiment log."]
+exclusions = ["Real-data training (KS-MODEL-03).", "Hyperparameter search, ensembles, TTA."]
+guidance = """Install torch via `uv sync --extra ml`. Default to CPU-friendly settings for the smoke run. The smoke run's metrics are meaningless and must be labelled 'synthetic smoke test' in the log."""
+files = ["ml/kneescope_ml/model.py", "ml/kneescope_ml/train.py", "scripts/train.py", "config/train.toml", "tests/ml/test_train_smoke.py", "docs/experiments.md"]
+contract_impact = "Implements ModelOutput (contracts §5). No schema change."
+acceptance = ["pytest tests/ml/test_train_smoke.py trains 2 steps on synthetic data on CPU in under 120 s and writes a checkpoint plus metadata.json with all required keys.", "Two runs with the same seed produce identical first-step loss (test).", "A label mask of zeros contributes zero loss (test).", "Missing-plane inputs do not change the output when their mask is false (test)."]
+verification = ["uv sync --extra ml && pytest tests/ml/test_train_smoke.py"]
+docs = ["docs/experiments.md (new)", "docs/architecture.md (training section)"]
+dod = ["Run metadata format documented in docs/experiments.md."]
+[issue.science]
+dataset = "Synthetic phantom smoke data only."
+partition = "Not applicable."
+metrics = "Loss only, labelled synthetic."
+cannot_claim = "Any performance; smoke metrics are not results."
+artifacts = "Run directory layout, metadata schema, experiment log."
+
+[[issue]]
+id = "KS-MODEL-03"
+title = "Train the baseline model on the selected dataset"
+epic = "KS-EPIC-MODEL"
+type = "task"
+priority = "P0"
+workstream = "modelling"
+owner_role = "Modelling"
+depends_on = ["KS-MODEL-02", "KS-DATA-09", "KS-LABEL-01", "KS-DATA-08"]
+problem = """The product needs one honest baseline: frozen pretrained encoder plus trained heads first, documented slice sampling, masked loss, and class weighting only if imbalance justifies it."""
+outcome = """One run on the training partition, model selection on validation only, checkpoint saved outside git with SHA-256, config and metadata recorded, validation metrics logged."""
+scope = ["Frozen-encoder baseline with trained pooling and heads.", "Early stopping/selection on validation loss or validation macro AUC (declare which).", "Record compute used (hardware, wall time).", "Log validation metrics through kneescope_ml.evaluation."]
+exclusions = ["Fine-tuning (KS-MODEL-04, conditional).", "Any use of the test partition."]
+guidance = """If compute is limited (e.g. Kaggle/Colab GPU quotas), reduce resolution or slice count and record it — do not assume a paid GPU subscription. Expect modest results; report them as they are."""
+files = ["config/train.toml", "docs/experiments.md", "artifacts/runs/ (untracked)"]
+contract_impact = "Defines supported_findings and model_version for config/model.toml."
+acceptance = ["docs/experiments.md lists the run with run_id, seed, git SHA, preprocessing version, split hash, hardware, wall time, checkpoint SHA-256.", "Validation metrics JSON exists for the run and validates against MetricsSnapshot with partition 'validation'.", "The test partition was not loaded during training or selection (data loader logs show only train/validation)."]
+verification = ["python scripts/train.py --config config/train.toml", "python scripts/validate_artifact.py MetricsSnapshot artifacts/runs/<run_id>/metrics_validation.json"]
+docs = ["docs/experiments.md", "docs/model-card.md (training section)"]
+dod = ["Evaluation owner confirms the run used the agreed partitions."]
+[issue.science]
+dataset = "Selected dataset, cached tensors at frozen preprocessing version."
+partition = "Train for fitting; validation for selection."
+metrics = "Validation per-finding ROC AUC, PR AUC, counts (via KS-EVAL-01)."
+cannot_claim = "Test performance; calibration; clinical utility."
+artifacts = "Checkpoint (untracked) + SHA-256, config, metadata, validation metrics JSON."
+
+[[issue]]
+id = "KS-MODEL-04"
+title = "[Conditional] One improvement round (fine-tuning or adjacent-slice input)"
+epic = "KS-EPIC-MODEL"
+type = "conditional"
+priority = "P2"
+workstream = "modelling"
+owner_role = "Modelling"
+depends_on = ["KS-MODEL-03", "KS-EVAL-03"]
+trigger = "Triggered only if KS-EVAL-03 shows the baseline is clearly above the comparator on validation and compute remains for at least one full additional run."
+problem = """Fine-tuning the encoder or adjacent-slice stacks may help, but each extra run costs compute and invites validation overfitting."""
+outcome = """At most one pre-declared improvement experiment, selected on validation, with the same reporting as the baseline; the served checkpoint changes only if the improvement is recorded and the test partition remains untouched until final evaluation."""
+scope = ["Declare the single change before running.", "Same splits, same metrics."]
+exclusions = ["Ensembles, TTA, hyperparameter sweeps."]
+guidance = """If the improvement is within noise, keep the baseline. Record both in docs/experiments.md."""
+files = ["config/train.toml", "docs/experiments.md"]
+contract_impact = "May change model_version; cached predictions must be regenerated."
+acceptance = ["Pre-declared hypothesis committed before the run (docs/experiments.md entry timestamped).", "Validation comparison table baseline vs improved with counts.", "Decision entry on which checkpoint is served."]
+verification = ["python scripts/train.py --config config/train-improve.toml"]
+docs = ["docs/experiments.md", "docs/decisions.md"]
+dod = ["Served checkpoint decision recorded."]
+[issue.science]
+dataset = "Same as KS-MODEL-03."
+partition = "Validation for selection."
+metrics = "Per-finding ROC AUC with counts."
+cannot_claim = "That a validation difference generalises."
+artifacts = "Second run directory and comparison."
+
+[[issue]]
+id = "KS-MODEL-05"
+science_exempt = "Packaging and verification of an existing checkpoint; no new scientific result."
+title = "Package the checkpoint for serving with hash verification and a Predictor implementation"
+epic = "KS-EPIC-MODEL"
+type = "task"
+priority = "P0"
+workstream = "modelling"
+owner_role = "Modelling with Backend reviewer"
+depends_on = ["KS-MODEL-03"]
+problem = """kneescope_ml.inference.load_predictor is a placeholder. Serving needs a CPU-capable Predictor that loads the checkpoint, verifies its SHA-256 against config/model.toml, and exposes model_id, model_version and supported_findings."""
+outcome = """load_predictor returns a working Predictor; config/model.toml is filled for the chosen checkpoint (path outside git); a tiny synthetic checkpoint is generated in tests to exercise the path in CI."""
+scope = ["Checkpoint format (state_dict + metadata JSON).", "SHA-256 verification; mismatch → ModelNotAvailableError.", "CPU inference, eval mode, no grad.", "Test with a generated tiny checkpoint."]
+exclusions = ["GPU hosting.", "Committing checkpoint files."]
+guidance = """Model weights may be subject to the dataset terms (e.g. RSNA winners' licensing does not apply to us, but data-derived weights' distribution should be checked under KS-DATA-01). Store under artifacts/checkpoints/ (ignored)."""
+files = ["ml/kneescope_ml/inference.py", "config/model.toml", "tests/ml/test_inference.py"]
+contract_impact = "ModelInfo values in every live/cached prediction."
+acceptance = ["Test: generated tiny checkpoint loads and predict() returns scores in [0,1] for exactly the supported findings.", "Test: a tampered checkpoint (one byte changed) raises ModelNotAvailableError.", "config/model.toml has non-empty model_version, checkpoint_sha256, finding_profile matching the selected profile."]
+verification = ["uv sync --extra ml && pytest tests/ml/test_inference.py"]
+docs = ["README.md 'Model artifacts' section", "docs/model-card.md versions"]
+dod = ["Weight distribution permission noted in docs/data-audit.md §1."]

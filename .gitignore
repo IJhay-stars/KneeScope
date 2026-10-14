@@ -1,3 +1,49 @@
+# Restricted and large assets — never commit (AGENTS.md §15, docs/decisions.md D-007)
+# Root-anchored so packages such as src/kneeml/data/ are not ignored.
+/data/*
+!/data/.gitkeep
+/artifacts/
+*.dcm
+*.nii
+*.nii.gz
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# Web
+web/node_modules/
+web/dist/
+web/coverage/
+*.tsbuildinfo
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Agent worktrees and local tool state
+.claude/
+
+# ---- From the original main-branch scaffold (kept verbatim) ----
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

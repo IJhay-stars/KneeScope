@@ -1,0 +1,510 @@
+{
+  "$defs": {
+    "DataOrigin": {
+      "description": "Where a study or artifact came from.",
+      "enum": [
+        "fixture",
+        "dataset"
+      ],
+      "title": "DataOrigin",
+      "type": "string"
+    },
+    "FindingMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "brier": {
+          "$ref": "#/$defs/MetricValue"
+        },
+        "finding_id": {
+          "title": "Finding Id",
+          "type": "string"
+        },
+        "n_negative": {
+          "minimum": 0,
+          "title": "N Negative",
+          "type": "integer"
+        },
+        "n_positive": {
+          "minimum": 0,
+          "title": "N Positive",
+          "type": "integer"
+        },
+        "n_unknown": {
+          "description": "Excluded from every metric; never counted as negative.",
+          "minimum": 0,
+          "title": "N Unknown",
+          "type": "integer"
+        },
+        "pr_auc": {
+          "$ref": "#/$defs/MetricValue"
+        },
+        "prevalence": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prevalence"
+        },
+        "roc_auc": {
+          "$ref": "#/$defs/MetricValue"
+        },
+        "sensitivity": {
+          "$ref": "#/$defs/MetricValue"
+        },
+        "specificity": {
+          "$ref": "#/$defs/MetricValue"
+        },
+        "threshold": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Threshold"
+        },
+        "threshold_selected_on": {
+          "anyOf": [
+            {
+              "const": "validation",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Threshold Selected On"
+        }
+      },
+      "required": [
+        "finding_id",
+        "n_positive",
+        "n_negative",
+        "n_unknown",
+        "roc_auc",
+        "pr_auc",
+        "sensitivity",
+        "specificity",
+        "brier"
+      ],
+      "title": "FindingMetrics",
+      "type": "object"
+    },
+    "InferenceMeasurement": {
+      "additionalProperties": false,
+      "properties": {
+        "hardware": {
+          "title": "Hardware",
+          "type": "string"
+        },
+        "latency_ms_p50": {
+          "minimum": 0,
+          "title": "Latency Ms P50",
+          "type": "number"
+        },
+        "latency_ms_p95": {
+          "minimum": 0,
+          "title": "Latency Ms P95",
+          "type": "number"
+        },
+        "n_runs": {
+          "minimum": 1,
+          "title": "N Runs",
+          "type": "integer"
+        },
+        "peak_memory_mb": {
+          "minimum": 0,
+          "title": "Peak Memory Mb",
+          "type": "number"
+        }
+      },
+      "required": [
+        "latency_ms_p50",
+        "latency_ms_p95",
+        "peak_memory_mb",
+        "n_runs",
+        "hardware"
+      ],
+      "title": "InferenceMeasurement",
+      "type": "object"
+    },
+    "MacroAuc": {
+      "additionalProperties": false,
+      "properties": {
+        "excluded": {
+          "description": "code = finding_id, message = why excluded.",
+          "items": {
+            "$ref": "#/$defs/Reason"
+          },
+          "title": "Excluded",
+          "type": "array"
+        },
+        "included": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Included",
+          "type": "array"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "value",
+        "included",
+        "excluded"
+      ],
+      "title": "MacroAuc",
+      "type": "object"
+    },
+    "MetricValue": {
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "enum": [
+            "defined",
+            "undefined_single_class",
+            "not_computed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "title": "MetricValue",
+      "type": "object"
+    },
+    "ModelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "SHA-256 of the checkpoint file. None only for fixtures.",
+          "title": "Checkpoint Sha256"
+        },
+        "finding_profile": {
+          "title": "Finding Profile",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_version": {
+          "title": "Model Version",
+          "type": "string"
+        },
+        "supported_findings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Findings",
+          "type": "array"
+        },
+        "trained_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Dataset ID and partition; None for fixtures.",
+          "title": "Trained On"
+        }
+      },
+      "required": [
+        "model_id",
+        "model_version",
+        "checkpoint_sha256",
+        "finding_profile",
+        "supported_findings",
+        "trained_on"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "PreprocessingInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "config_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Sha256"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "title": "PreprocessingInfo",
+      "type": "object"
+    },
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "Machine-readable code, usually an ErrorCode value.",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "description": "Plain-language explanation safe to show to a reviewer.",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Reason",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "calibration": {
+      "default": "not_assessed",
+      "enum": [
+        "not_assessed",
+        "assessed"
+      ],
+      "title": "Calibration",
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Created At"
+    },
+    "dataset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dataset Id"
+    },
+    "grouping_unit": {
+      "anyOf": [
+        {
+          "enum": [
+            "patient",
+            "study"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Grouping Unit"
+    },
+    "inference": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InferenceMeasurement"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "macro_roc_auc": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MacroAuc"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "model": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "n_studies": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "N Studies"
+    },
+    "origin": {
+      "$ref": "#/$defs/DataOrigin"
+    },
+    "partition": {
+      "anyOf": [
+        {
+          "enum": [
+            "validation",
+            "test"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Partition"
+    },
+    "per_finding": {
+      "items": {
+        "$ref": "#/$defs/FindingMetrics"
+      },
+      "title": "Per Finding",
+      "type": "array"
+    },
+    "preprocessing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PreprocessingInfo"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reason"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "split_method": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Split Method"
+    },
+    "status": {
+      "enum": [
+        "available",
+        "unavailable"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "origin"
+  ],
+  "title": "MetricsSnapshot",
+  "type": "object"
+}

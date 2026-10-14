@@ -1,0 +1,108 @@
+[[issue]]
+id = "KS-LABEL-01"
+title = "Build the labels file with provenance and explicit unknown handling"
+epic = "KS-EPIC-LABELS"
+type = "task"
+priority = "P0"
+workstream = "labels"
+owner_role = "Labels/explainability"
+depends_on = ["KS-DATA-04"]
+problem = """Training, splitting, evaluation and the 'Reveal dataset label' view need one labels table per selected finding with states positive/negative/unknown/not_labeled and provenance. Missing or uncertain labels must not become negatives."""
+outcome = """scripts/build_labels.py produces artifacts/labels/<dataset>.parquet (or CSV) with study_id, finding_id, state, provenance, source_ref; kneescope_ml.labels loads it; counts match the audit."""
+scope = ["Map dataset columns to finding IDs via contracts/findings.json dataset_columns.", "States: dataset 1 → positive, 0 → negative, blank/uncertain → unknown, study outside labelled subset → not_labeled.", "Provenance: expert_annotation or dataset_provided as documented by the dataset.", "Loader returns DatasetLabel records for the API."]
+exclusions = ["Report-derived labels (KS-LABEL-02, conditional).", "Any import from the inference path."]
+guidance = """Keep labels out of git if terms restrict them. The loader lives in kneescope_ml.labels, which the isolation test forbids in inference/preprocess modules."""
+files = ["scripts/build_labels.py", "ml/kneescope_ml/labels.py", "tests/ml/test_labels.py"]
+contract_impact = "Feeds StudyLabels (contracts §8). No schema change."
+acceptance = ["Per-finding counts from the labels file equal the KS-DATA-03 audit counts (test or script check).", "A test proves blank/uncertain values become 'unknown', never 'negative'.", "tests/test_label_isolation.py still passes."]
+verification = ["python scripts/build_labels.py --dataset <id> --check-against artifacts/audit/<id>.json", "pytest tests/ml/test_labels.py tests/test_label_isolation.py"]
+docs = ["docs/data-audit.md §3 'Labels'", "docs/model-card.md (labels section)"]
+dod = ["Label provenance stated per finding in the model card draft."]
+[issue.science]
+dataset = "Selected dataset's provided labels (RSNA: labelled subset of train.csv)."
+partition = "All labelled studies (split assignment happens in KS-DATA-08)."
+metrics = "Counts per state."
+cannot_claim = "That unknown labels are negative; that labels are clinical ground truth beyond the dataset's annotation process."
+artifacts = "Labels file (untracked if restricted), build script, count check."
+
+[[issue]]
+id = "KS-LABEL-02"
+title = "[Conditional] Extract labels from radiology reports with negation, uncertainty and provenance"
+epic = "KS-EPIC-LABELS"
+type = "conditional"
+priority = "P1"
+workstream = "labels"
+owner_role = "Labels/explainability"
+depends_on = ["KS-DATA-04", "KS-LABEL-01"]
+trigger = "Triggered only if KS-DATA-04 records that the provided labelled subset is too small for the selected findings and that report extraction is permitted and worth the effort."
+problem = """RSNA provides multilingual free-text reports for studies without labels. Extracted labels could enlarge training data but introduce noise; negation, uncertainty and language must be handled, and reports must never become an inference input."""
+outcome = """A versioned, rule-based (or documented model-based) extractor producing report_extracted labels with rule version in source_ref, a manual spot-check sample with agreement figures against the provided labels, and a decision on whether extracted labels are used for training only (never for evaluation)."""
+scope = ["Extractor with per-language patterns or a permitted translation step run locally.", "Negation and uncertainty → negative/unknown rules.", "Spot check ≥50 reports per language group present, plus agreement vs provided labels on the overlapping subset.", "Training-only use flag."]
+exclusions = ["Evaluation partitions use provided expert/dataset labels only.", "No report text in the repository, logs or issues.", "No upload of reports to external APIs without verified permission."]
+guidance = """The original report must not be available at inference. Store extracted labels with provenance report_extracted and source_ref 'rules vX.Y'."""
+files = ["ml/kneescope_ml/report_labels.py", "scripts/extract_report_labels.py", "tests/ml/test_report_labels.py", "docs/data-audit.md"]
+contract_impact = "Uses LabelProvenance.report_extracted (already in contract)."
+acceptance = ["Unit tests cover negation ('no ACL tear'), uncertainty ('possible tear'), and at least two languages present in the data.", "Agreement table (per finding, per language group) vs provided labels committed to docs/data-audit.md with sample sizes.", "A test fails if any evaluation partition label has provenance report_extracted.", "Extractor version recorded in every extracted label's source_ref."]
+verification = ["pytest tests/ml/test_report_labels.py", "python scripts/extract_report_labels.py --sample 50 --spot-check"]
+docs = ["docs/data-audit.md §3", "docs/model-card.md", "docs/decisions.md"]
+dod = ["Decision entry states whether extracted labels are used and why."]
+[issue.science]
+dataset = "RSNA reports for unlabelled training studies."
+partition = "Training only."
+metrics = "Agreement (per-class) against provided labels on overlap; spot-check error rate."
+cannot_claim = "That extracted labels equal expert labels; any evaluation result computed on extracted labels."
+artifacts = "Extractor version, spot-check sheet (local), agreement table."
+
+[[issue]]
+id = "KS-LABEL-03"
+title = "Influential-slice explanations aligned to series slice coordinates"
+epic = "KS-EPIC-LABELS"
+type = "task"
+priority = "P1"
+workstream = "labels"
+owner_role = "Labels/explainability"
+depends_on = ["KS-MODEL-03"]
+problem = """Reviewers want to jump to the slices that most influenced a finding's score. Slice weights from the model refer to sampled tensor positions and must be mapped back to series slice_index via source_slice_index, for the same study, finding, prediction and checkpoint."""
+outcome = """kneescope_ml.explain.influential_slices(output, preprocessed, finding_id) returns an Explanation (kind influential_slices) with series slice indices and relative weights; failures return status 'unavailable' with a reason."""
+scope = ["Derive per-finding slice weights (attention pooling weights or gradient-based slice importance — document which).", "Map through source_slice_index; drop padding.", "Return Explanation with series_id, plane, rendered size, prediction_id and model_version.", "Alignment test with a synthetic volume where the influential slice is known."]
+exclusions = ["Pixel-level heatmaps (KS-LABEL-04, optional).", "Wording that implies lesion location."]
+guidance = """Name it 'Influential slices'. If the model has no slice-level signal for a finding, return unavailable rather than inventing weights."""
+files = ["ml/kneescope_ml/explain.py", "tests/ml/test_explain.py"]
+contract_impact = "Produces Explanation (contracts §7). No schema change."
+acceptance = ["Synthetic test: a volume whose only non-zero slice is index k yields k as the top influential slice after mapping.", "Explanations for padding positions never appear (test).", "Explanation validates against the contract and carries the matching prediction_id and model_version.", "Unavailable path returns reason code EXPLANATION_UNAVAILABLE."]
+verification = ["pytest tests/ml/test_explain.py"]
+docs = ["docs/model-card.md (explanations section)", "contracts/README.md §7 if behaviour clarifies"]
+dod = ["Owner of KS-API-03 confirms the function signature."]
+[issue.science]
+dataset = "Selected dataset; evaluation partition for any qualitative review."
+partition = "Validation or test, stated when screenshots are used."
+metrics = "None (qualitative); alignment correctness is tested."
+cannot_claim = "That influential slices localise or prove an injury."
+artifacts = "Explanation code version tied to checkpoint; alignment tests."
+
+[[issue]]
+id = "KS-LABEL-04"
+title = "[Optional] Grad-CAM attention maps with alignment verification"
+epic = "KS-EPIC-LABELS"
+type = "optional"
+priority = "P2"
+workstream = "labels"
+owner_role = "Labels/explainability"
+depends_on = ["KS-LABEL-03"]
+problem = """Pixel-level model attention can help reviewers see what influenced a score, but it is easy to misalign or over-interpret."""
+outcome = """Optional AttentionMap entries (png_base64_gray8) at rendered slice size for the top influential slices, produced only when the alignment check passes."""
+scope = ["Grad-CAM on the 2D encoder for selected slices.", "Resample from tensor space back to rendered slice pixels (undo padding and resize).", "Alignment test with a synthetic marker."]
+exclusions = ["Rainbow/jet colour maps (UI uses single-hue ochre→rust).", "Lesion terminology."]
+guidance = """If the backbone or resize path makes inverse mapping ambiguous, ship influential slices only."""
+files = ["ml/kneescope_ml/explain.py", "tests/ml/test_gradcam_alignment.py"]
+contract_impact = "Uses AttentionMap (already in contract)."
+acceptance = ["Synthetic test: a bright marker at known rendered-pixel coordinates yields peak attention within 5 rendered pixels after inverse mapping.", "Attention map dimensions equal rendered_width × rendered_height (contract validation).", "On alignment failure the explanation is 'unavailable' with a reason (test)."]
+verification = ["pytest tests/ml/test_gradcam_alignment.py"]
+docs = ["docs/model-card.md", "DESIGN.md §14 if overlay behaviour changes"]
+dod = ["UI owner verified overlay drawing with one real map."]
+[issue.science]
+dataset = "Selected dataset."
+partition = "Validation/test, stated."
+metrics = "Alignment error in pixels on synthetic tests."
+cannot_claim = "Lesion localisation."
+artifacts = "Alignment tests and code version."

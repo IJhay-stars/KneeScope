@@ -1,0 +1,251 @@
+{
+  "$defs": {
+    "AttentionMap": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "description": "Base64 PNG, gray 0-255 = relative attention 0-1.",
+          "title": "Data",
+          "type": "string"
+        },
+        "encoding": {
+          "const": "png_base64_gray8",
+          "default": "png_base64_gray8",
+          "title": "Encoding",
+          "type": "string"
+        },
+        "height": {
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        },
+        "slice_index": {
+          "minimum": 0,
+          "title": "Slice Index",
+          "type": "integer"
+        },
+        "width": {
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "slice_index",
+        "width",
+        "height",
+        "data"
+      ],
+      "title": "AttentionMap",
+      "type": "object"
+    },
+    "ExplanationSlice": {
+      "additionalProperties": false,
+      "properties": {
+        "slice_index": {
+          "description": "0-based index in the series' slice order.",
+          "minimum": 0,
+          "title": "Slice Index",
+          "type": "integer"
+        },
+        "weight": {
+          "description": "Relative influence, max-normalised.",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Weight",
+          "type": "number"
+        }
+      },
+      "required": [
+        "slice_index",
+        "weight"
+      ],
+      "title": "ExplanationSlice",
+      "type": "object"
+    },
+    "Plane": {
+      "enum": [
+        "sagittal",
+        "coronal",
+        "axial"
+      ],
+      "title": "Plane",
+      "type": "string"
+    },
+    "Reason": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "Machine-readable code, usually an ErrorCode value.",
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "description": "Plain-language explanation safe to show to a reviewer.",
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Reason",
+      "type": "object"
+    },
+    "ResultSource": {
+      "description": "How a prediction was produced. Never relabel one as another.",
+      "enum": [
+        "live",
+        "cached",
+        "fixture"
+      ],
+      "title": "ResultSource",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attention": {
+      "items": {
+        "$ref": "#/$defs/AttentionMap"
+      },
+      "title": "Attention",
+      "type": "array"
+    },
+    "coordinate_space": {
+      "const": "rendered_slice_pixels",
+      "default": "rendered_slice_pixels",
+      "title": "Coordinate Space",
+      "type": "string"
+    },
+    "finding_id": {
+      "title": "Finding Id",
+      "type": "string"
+    },
+    "kind": {
+      "anyOf": [
+        {
+          "enum": [
+            "influential_slices",
+            "attention_map"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Kind"
+    },
+    "model_version": {
+      "title": "Model Version",
+      "type": "string"
+    },
+    "notice": {
+      "default": "Shows what influenced the model score; it does not localise an injury.",
+      "title": "Notice",
+      "type": "string"
+    },
+    "plane": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Plane"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "prediction_id": {
+      "title": "Prediction Id",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Reason"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "rendered_height": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rendered Height"
+    },
+    "rendered_width": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rendered Width"
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "series_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Series Id"
+    },
+    "slices": {
+      "items": {
+        "$ref": "#/$defs/ExplanationSlice"
+      },
+      "title": "Slices",
+      "type": "array"
+    },
+    "source": {
+      "$ref": "#/$defs/ResultSource"
+    },
+    "status": {
+      "enum": [
+        "available",
+        "unavailable"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "study_id": {
+      "title": "Study Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "study_id",
+    "finding_id",
+    "prediction_id",
+    "model_version",
+    "status",
+    "source"
+  ],
+  "title": "Explanation",
+  "type": "object"
+}

@@ -1,0 +1,125 @@
+[[issue]]
+id = "KS-DOC-01"
+title = "Reproducible README: a teammate sets up and runs inference from a clean clone"
+epic = "KS-EPIC-DELIVERY"
+type = "task"
+priority = "P0"
+workstream = "delivery"
+owner_role = "Coordinator/integrator with a teammate as tester"
+depends_on = ["KS-API-02", "KS-MODEL-05", "KS-OPS-02"]
+problem = """The plan's first completion criterion: a teammate can reproduce setup and inference from the README."""
+outcome = """README covers prerequisites, fixture mode, data placement (without redistributing data), checkpoint placement and hash check, model mode, cached mode, tests, and troubleshooting; a teammate who did not write it follows it on a clean machine and records the result."""
+scope = ["Update README sections.", "Clean-clone test by someone else; capture commands and timings.", "Fix every gap found."]
+exclusions = ["Instructions that require private credentials in files."]
+guidance = """Commands must be copy-pasteable. Data download steps point to the official source and require each person to accept terms themselves."""
+files = ["README.md", "docs/reproducibility.md"]
+contract_impact = "None."
+acceptance = ["docs/reproducibility.md contains a dated log from a teammate (not the author) showing fixture mode and model mode working from a clean clone, with commands run.", "scripts/check_docs.py passes (no broken local links, no placeholders)."]
+verification = ["python scripts/check_docs.py"]
+docs = ["README.md", "docs/reproducibility.md"]
+dod = ["Tester's name and date recorded."]
+
+[[issue]]
+id = "KS-DEMO-01"
+title = "Select demo cases: a correct case, an error case and a limitation"
+epic = "KS-EPIC-DELIVERY"
+type = "task"
+priority = "P1"
+workstream = "delivery"
+owner_role = "Design/frontend (demo owner) with Evaluation"
+depends_on = ["KS-EVAL-04", "KS-EVAL-07", "KS-DATA-10"]
+problem = """The plan requires the demo to show a correct case, an error case and a limitation, using permitted studies from the evaluation partition."""
+outcome = """docs/demo-script.md lists the chosen study IDs (manifest IDs only), why each was chosen, the expected screen at each step, and the evidence that the 'correct' case is correct per its dataset label."""
+scope = ["Pick from the manifest and error analysis.", "Include a missing-series or failure state.", "Include a limitation (e.g. weak finding, undefined AUC, explanation caveat)."]
+exclusions = ["Cherry-picking presented as typical performance."]
+guidance = """State on screen or in narration that cases were selected for illustration."""
+files = ["docs/demo-script.md"]
+contract_impact = "None."
+acceptance = ["Three cases listed with roles (correct, error, limitation) and their partition.", "Each case runs in cached mode offline (checked)."]
+verification = ["Manual run-through in cached mode recorded in the PR."]
+docs = ["docs/demo-script.md"]
+dod = ["Evaluation owner agrees cases are fairly described."]
+
+[[issue]]
+id = "KS-DEMO-02"
+title = "Demo script and rehearsal"
+epic = "KS-EPIC-DELIVERY"
+type = "task"
+priority = "P1"
+workstream = "delivery"
+owner_role = "Design/frontend (demo owner)"
+depends_on = ["KS-DEMO-01", "KS-WEB-07", "KS-API-04", "KS-WEB-06"]
+problem = """The presentation narrative (plan p.8, PRD §17.6) must run in about three minutes: inspect a study, run inference, review a finding, reveal its label, show evaluation, explain a failure, name limits."""
+outcome = """docs/demo-script.md with timed steps, spoken claims checked against the model card, fallback switch points (live → cached → recording), and at least one full timed rehearsal noted."""
+scope = ["Write the script.", "Rehearse live and in cached mode.", "Check every spoken claim against artifacts."]
+exclusions = ["Slide deck (separate task)."]
+guidance = """Banned phrasing: 'detects tears', 'accuracy' for AUC, 'probability' for uncalibrated scores, 'shows where the tear is'."""
+files = ["docs/demo-script.md"]
+contract_impact = "None."
+acceptance = ["Script steps each list the screen, the action, and the claim with its source artifact.", "Rehearsal log with duration ≤ the organizer's limit (or 3 minutes if unknown).", "Fallback triggers defined (e.g. live call > 10 s → switch to cached)."]
+verification = ["Rehearsal recorded in the PR (time and issues found)."]
+docs = ["docs/demo-script.md"]
+dod = ["QA role reviewed claims."]
+
+[[issue]]
+id = "KS-DEMO-03"
+title = "Recorded fallback demonstration within data-use terms"
+epic = "KS-EPIC-DELIVERY"
+type = "task"
+priority = "P1"
+workstream = "delivery"
+owner_role = "Design/frontend (demo owner)"
+depends_on = ["KS-DEMO-02", "KS-DATA-01"]
+problem = """A recording protects against live failure, but recordings of restricted images may count as making data available."""
+outcome = """A recording of the scripted demo, stored where the permitted-use table allows (local only if unclear), with a note of the permission basis; if recording images is not permitted, a recording in fixture mode plus narrated results."""
+scope = ["Record per script.", "Store per permission.", "Note permission basis."]
+exclusions = ["Uploading to public platforms without permission and coordinator approval."]
+guidance = """Check KS-DATA-01 'recording' row before recording real slices."""
+files = ["docs/demo-script.md"]
+contract_impact = "None."
+acceptance = ["docs/demo-script.md 'Recording' section states file location, mode (dataset or fixture), permission basis, and who approved sharing.", "Recording plays end to end (checked by a second person)."]
+verification = ["Second person playback check noted in the issue."]
+docs = ["docs/demo-script.md"]
+dod = ["Stored according to permission."]
+
+[[issue]]
+id = "KS-DEL-01"
+title = "Assemble and submit the final delivery package"
+epic = "KS-EPIC-DELIVERY"
+type = "task"
+priority = "P0"
+workstream = "delivery"
+owner_role = "Coordinator/integrator (human submits)"
+depends_on = ["KS-SCOPE-01", "KS-DOC-01", "KS-DEMO-03", "KS-QA-02"]
+problem = """The organizer requirements (KS-SCOPE-01) define what is submitted. Everything must be consistent: README, model card, metrics, demo, recording, repository state."""
+outcome = """A checklist in this issue (filled from KS-SCOPE-01) with each deliverable linked; repository tagged; submission performed by a human."""
+scope = ["Fill checklist.", "Tag release.", "Verify links from a logged-out browser.", "Human submits."]
+exclusions = ["Agents do not submit, accept terms, or publish on anyone's behalf."]
+guidance = """If any deliverable is missing, say so in the submission rather than substituting."""
+files = ["docs/issue-index.md", "README.md"]
+contract_impact = "None."
+acceptance = ["Every required deliverable from KS-SCOPE-01 is linked and checked by a second person.", "git tag exists for the delivered commit.", "Submission confirmation reference recorded (no credentials)."]
+verification = ["git tag --list 'v*'", "Checklist review in the issue."]
+docs = ["docs/issue-index.md"]
+dod = ["Submission confirmed."]
+
+[[issue]]
+id = "KS-QA-02"
+title = "Independent completion review against the evidence-based definition of done"
+epic = "KS-EPIC-DELIVERY"
+type = "task"
+priority = "P0"
+workstream = "qa"
+owner_role = "Independent reviewer/QA"
+depends_on = ["KS-QA-01", "KS-EVAL-06", "KS-API-05", "KS-API-03", "KS-WEB-07", "KS-OPS-01", "KS-DEMO-02"]
+problem = """Issues get closed because code exists. The plan defines completion through evidence (plan §10)."""
+outcome = """docs/completion-review.md checks each plan §10 criterion with a link to evidence, and lists any gap as an open issue; the review is done by someone who did not implement the checked item."""
+scope = ["Plan §10 checklist: reproducible README; same preprocessing for selected studies; real checkpoint outputs displayed; cached outputs identify source and checkpoint; clear errors for missing/malformed inputs; held-out evaluation with counts and split method; legitimate label source per finding; explanations aligned or omitted; data and model assets used within permissions; demo shows correct case, error case and limitation.", "Contract agreement: export --check, web gen:api:check.", "Scientific guardrails review (AGENTS.md)."]
+exclusions = ["Fixing issues found (file them)."]
+guidance = """Mark each item pass/fail with evidence link; 'fail' blocks KS-DEL-01."""
+files = ["docs/completion-review.md"]
+contract_impact = "None."
+acceptance = ["Every plan §10 criterion has pass/fail and an evidence link.", "All guardrails in AGENTS.md 'Scientific and product guardrails' reviewed with pass/fail.", "Failures are linked to open issues."]
+verification = ["python scripts/backlog.py check", "python scripts/export_contracts.py --check", "pnpm --dir web gen:api:check"]
+docs = ["docs/completion-review.md"]
+dod = ["No 'fail' remains unaddressed before KS-DEL-01."]

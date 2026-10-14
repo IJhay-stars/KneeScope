@@ -1,0 +1,35 @@
+{
+  "body": {
+    "attention": [],
+    "coordinate_space": "rendered_slice_pixels",
+    "finding_id": "acl",
+    "kind": "influential_slices",
+    "model_version": "fixture-0",
+    "notice": "Shows what influenced the model score; it does not localise an injury.",
+    "plane": "sagittal",
+    "prediction_id": "fx-pred-fx-study-001-interaction_prototype",
+    "reason": null,
+    "rendered_height": 256,
+    "rendered_width": 256,
+    "schema_version": "0.1.0",
+    "series_id": "fx-ser-01",
+    "slices": [
+      {
+        "slice_index": 12,
+        "weight": 1.0
+      },
+      {
+        "slice_index": 13,
+        "weight": 0.8
+      },
+      {
+        "slice_index": 15,
+        "weight": 0.55
+      }
+    ],
+    "source": "fixture",
+    "status": "available",
+    "study_id": "fx-study-001"
+  },
+  "status": 200
+}

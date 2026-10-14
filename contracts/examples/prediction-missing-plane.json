@@ -1,0 +1,111 @@
+{
+  "body": {
+    "findings": [
+      {
+        "above_threshold": null,
+        "display_name": "ACL",
+        "explanation_available": false,
+        "finding_id": "acl",
+        "reason": {
+          "code": "INPUT_INVALID",
+          "message": "Sagittal series missing; the model requires a sagittal series."
+        },
+        "score": null,
+        "score_kind": null,
+        "status": "unavailable",
+        "threshold": null
+      },
+      {
+        "above_threshold": null,
+        "display_name": "MCL",
+        "explanation_available": false,
+        "finding_id": "mcl",
+        "reason": {
+          "code": "INPUT_INVALID",
+          "message": "Sagittal series missing; the model requires a sagittal series."
+        },
+        "score": null,
+        "score_kind": null,
+        "status": "unavailable",
+        "threshold": null
+      },
+      {
+        "above_threshold": null,
+        "display_name": "Medial meniscus",
+        "explanation_available": false,
+        "finding_id": "medial_meniscus",
+        "reason": {
+          "code": "INPUT_INVALID",
+          "message": "Sagittal series missing; the model requires a sagittal series."
+        },
+        "score": null,
+        "score_kind": null,
+        "status": "unavailable",
+        "threshold": null
+      },
+      {
+        "above_threshold": null,
+        "display_name": "Lateral meniscus",
+        "explanation_available": false,
+        "finding_id": "lateral_meniscus",
+        "reason": {
+          "code": "NOT_SUPPORTED",
+          "message": "Not supported by this model."
+        },
+        "score": null,
+        "score_kind": null,
+        "status": "unsupported",
+        "threshold": null
+      }
+    ],
+    "inputs": [
+      {
+        "plane": "coronal",
+        "series_id": "fx-ser-32",
+        "slices_used": 24
+      },
+      {
+        "plane": "axial",
+        "series_id": "fx-ser-33",
+        "slices_used": 30
+      }
+    ],
+    "missing_planes": [
+      "sagittal"
+    ],
+    "model": {
+      "checkpoint_sha256": null,
+      "finding_profile": "interaction_prototype",
+      "model_id": "fixture-model",
+      "model_version": "fixture-0",
+      "supported_findings": [
+        "acl",
+        "mcl",
+        "medial_meniscus"
+      ],
+      "trained_on": null
+    },
+    "prediction_id": "fx-pred-fx-study-004-interaction_prototype",
+    "preprocessing": {
+      "config_sha256": "0c6860b384638476c63657fdf2ba80ce3405e444e37169bd696b8a65ede5fe12",
+      "version": "prep-0.0.0-placeholder"
+    },
+    "provenance": {
+      "cache_key": null,
+      "computed_at": null,
+      "latency_ms": null,
+      "notice": "FIXTURE - hand-written development data, not a model output.",
+      "served_at": "<volatile>",
+      "source": "fixture"
+    },
+    "schema_version": "0.1.0",
+    "study_id": "fx-study-004",
+    "warnings": [
+      {
+        "code": "FIXTURE",
+        "message": "FIXTURE - hand-written development data, not a model output."
+      }
+    ]
+  },
+  "status": 200
+}

@@ -1,0 +1,75 @@
+{
+  "$defs": {
+    "FindingDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "finding_id": {
+          "title": "Finding Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "finding_id",
+        "display_name",
+        "description"
+      ],
+      "title": "FindingDefinition",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "dataset_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Dataset Id"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/FindingDefinition"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "note": {
+      "title": "Note",
+      "type": "string"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "candidate",
+        "selected",
+        "fixture_only"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "profile_id",
+    "dataset_id",
+    "status",
+    "note",
+    "findings"
+  ],
+  "title": "FindingProfile",
+  "type": "object"
+}

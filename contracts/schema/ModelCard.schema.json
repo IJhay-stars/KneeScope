@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "DataOrigin": {
+      "description": "Where a study or artifact came from.",
+      "enum": [
+        "fixture",
+        "dataset"
+      ],
+      "title": "DataOrigin",
+      "type": "string"
+    },
+    "ModelCardSection": {
+      "additionalProperties": false,
+      "properties": {
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "section_id": {
+          "title": "Section Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section_id",
+        "title",
+        "body"
+      ],
+      "title": "ModelCardSection",
+      "type": "object"
+    },
+    "ModelInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "SHA-256 of the checkpoint file. None only for fixtures.",
+          "title": "Checkpoint Sha256"
+        },
+        "finding_profile": {
+          "title": "Finding Profile",
+          "type": "string"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "model_version": {
+          "title": "Model Version",
+          "type": "string"
+        },
+        "supported_findings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Supported Findings",
+          "type": "array"
+        },
+        "trained_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Dataset ID and partition; None for fixtures.",
+          "title": "Trained On"
+        }
+      },
+      "required": [
+        "model_id",
+        "model_version",
+        "checkpoint_sha256",
+        "finding_profile",
+        "supported_findings",
+        "trained_on"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "PreprocessingInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "config_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Sha256"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "title": "PreprocessingInfo",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "model": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ModelInfo"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "origin": {
+      "$ref": "#/$defs/DataOrigin"
+    },
+    "preprocessing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PreprocessingInfo"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "default": "0.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sections": {
+      "items": {
+        "$ref": "#/$defs/ModelCardSection"
+      },
+      "title": "Sections",
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Updated At"
+    }
+  },
+  "required": [
+    "status",
+    "origin",
+    "model",
+    "preprocessing",
+    "sections",
+    "limitations"
+  ],
+  "title": "ModelCard",
+  "type": "object"
+}

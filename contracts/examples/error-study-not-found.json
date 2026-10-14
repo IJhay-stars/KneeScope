@@ -1,0 +1,12 @@
+{
+  "body": {
+    "error": {
+      "code": "STUDY_NOT_FOUND",
+      "detail": null,
+      "message": "Study does-not-exist not found.",
+      "request_id": "<volatile>",
+      "retryable": false
+    }
+  },
+  "status": 404
+}
